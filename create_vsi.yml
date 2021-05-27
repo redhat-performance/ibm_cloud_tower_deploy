@@ -1,0 +1,44 @@
+---
+- name: Configure VSI
+  ibm_is_instance:
+     name: "{{ name_prefix }}{{ item }}-vsi"
+     state: available
+     #id: "{{ vsi.id | default(omit) }}"
+     vpc: "{{ vpc.id }}"
+     profile: "{{ vsi_profile }}"
+     image: "{{ image_id }}"
+     keys:
+       - "{{ ssh_key.id }}"
+     primary_network_interface:
+       - subnet: "{{ subnet.id }}"
+     zone: "{{ zone }}"
+  register: vsi_create_output
+
+- name: Save VSI as fact
+  set_fact:
+     cacheable: True
+     vsi: "{{ vsi_create_output.resource }}"
+
+- name: Configure Floating IP Address
+  ibm_is_floating_ip:
+     name: "{{ name_prefix }}{{ item }}-fip"
+     state: available
+     #id: "{{ fip.id | default(omit) }}"
+     target: "{{ vsi.primary_network_interface[0]['id'] }}"
+  register: fip_create_output
+
+- name: Print Floating IP Address
+  debug:
+     msg: "IP Address: {{ fip_create_output.resource.address }}"
+
+- name: Save Floating IP as Tower Node
+  set_fact:
+     cacheable: True
+     tower_node: "{{ tower_node + [fip_create_output.resource.address] }}"
+  when: item != number_of_tower_instance 
+
+- name: Save Floating IP as Database Node
+  set_fact:
+     cacheable: True
+     db_node: "{{ db_node + [fip_create_output.resource.address] }}"
+  when: item == number_of_tower_instance

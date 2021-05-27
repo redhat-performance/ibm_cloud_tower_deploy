@@ -1,0 +1,54 @@
+---
+- name: "Create workspace for ansible tower installation"
+  file:
+    path: "/root/ansible-tower-setup"
+    state: directory
+
+- name: "Download installation tarball"
+  get_url:
+    url: "{{ installation_tarball }}"
+    dest: "/root/{{ installation_tarball | basename }}"
+    force: no
+
+- name: "Install tar before we attempt to unpack"
+  yum:
+    name: tar
+    state: present
+
+- name: "Unpack installation tarball"
+  unarchive:
+    src: "/root/{{ installation_tarball | basename }}"
+    dest: "/root/ansible-tower-setup"
+    remote_src: yes
+    extra_opts:
+      - "--strip-components=1"
+    creates: "/root/ansible-tower-setup/inventory"
+
+- name: "Copy the install vars file"
+  copy:
+    src: install_vars.yml
+    dest: /root/ansible-tower-setup/install_vars.yml
+
+- name: create the cluster install inventory
+  template:
+    src: inventory_cluster.j2
+    dest: /root/ansible-tower-setup/inventory.cluster
+
+- name: "Create ansible configuration file"
+  copy:
+    dest: "/root/ansible-tower-setup/ansible.cfg"
+    content: |
+        [defaults]
+        host_key_checking = False
+
+- name: "Running setup.sh"
+  command: "./setup.sh -i inventory.cluster -e @install_vars.yml"
+  args:
+    chdir: "/root/ansible-tower-setup"
+    creates: "/usr/bin/ansible-tower-service"
+
+- name: Create Inventory file for towerperf Monitoring and Benchmarking
+  template:
+    src: inventory_towerperf.j2
+    dest: /root/inventory_towerperf_ibm_cloud
+  delegate_to: localhost

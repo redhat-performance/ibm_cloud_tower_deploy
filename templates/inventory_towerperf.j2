@@ -1,0 +1,13 @@
+[server]
+{% for host in groups['tower'] %}
+{{ host }} 
+{% endfor %}{# for host in groups['tower'] #}
+
+
+[database]
+{% for host in groups['database'] %}
+{{ host }}
+{% endfor %}{# for host in groups['database'] #}
+
+[prometheus]
+perf54.perf.lab.eng.bos.redhat.com ansible_password=100yard-

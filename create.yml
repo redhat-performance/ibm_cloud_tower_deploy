@@ -1,0 +1,58 @@
+---
+- name: Create IBM Cloud VPC VSI
+  hosts: localhost
+  vars:
+    - tower_node: []
+    - db_node: []   
+  collections:
+   - ibm.cloudcollection
+  tasks:
+    - name: Fetch the variables from var file
+      include_vars:
+        file: vars.yml
+  
+    - name: Configure VPC
+      include_role:
+        name: configure_vpc
+
+    - name: Configure VPC Subnet
+      include_role:
+        name: configure_vpc_subnet
+
+    - name: Configure SSH Key
+      include_role:
+        name: configure_ssh
+
+    - name: Install the VM's
+      include_tasks: create_vsi.yml
+      loop: "{{ range(0, number_of_tower_instance + 1, 1)|list }}"
+
+    - name: Configure Security Group Rule
+      include_role:
+        name: configure_security_group
+
+    - name: Add VM's to Tower and Database group
+      include_role:
+        name: add_hosts
+
+- name: Check Ansible connection to new DEMO VSI
+  hosts: tower database
+  gather_facts: False
+  tasks:
+    - name: Wait for VSI to become reachable over SSH
+      wait_for_connection:
+
+- name: Check Ansible connection to new DEMO VSI
+  hosts: tower[0]
+  tasks:
+    - name: Fetch the variables from var file
+      include_vars:
+        file: vars.yml
+
+    - name: Copy the towerperf ssh private key
+      include_role:
+        name: copy_key
+
+    - name: Copy the towerperf ssh private key
+      include_role:
+        name: install_tower

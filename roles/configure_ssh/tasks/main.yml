@@ -1,0 +1,12 @@
+---
+- name: Configure SSH Key
+  ibm.cloudcollection.ibm_is_ssh_key:
+    name: "{{ name_prefix }}-ssh-key"
+    public_key: "{{ ssh_public_key }}"
+    id: "{{ ssh_key.id | default(omit) }}"
+  register: ssh_key_create_output
+
+- name: Save SSH Key as fact
+  set_fact:
+    cacheable: True
+    ssh_key: "{{ ssh_key_create_output.resource }}"

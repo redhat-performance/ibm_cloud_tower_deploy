@@ -1,0 +1,12 @@
+---
+- name: Configure VPC
+  ibm.cloudcollection.ibm_is_vpc:
+    name: "{{ name_prefix }}-vpc"
+    state: available
+    id: "{{ vpc.id | default(omit) }}"
+  register: vpc_create_output
+
+- name: Save VPC as fact
+  set_fact:
+    cacheable: True
+    vpc: "{{ vpc_create_output.resource }}"
