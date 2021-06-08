@@ -50,5 +50,5 @@
 - name: Create Inventory file for towerperf Monitoring and Benchmarking
   template:
     src: inventory_towerperf.j2
-    dest: ../../../conf/inventory_towerperf_ibm_cloud
+    dest: "{{ playbook_dir }}"/../conf/inventory_towerperf_ibm_cloud
   delegate_to: localhost
