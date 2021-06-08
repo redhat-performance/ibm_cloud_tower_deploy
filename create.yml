@@ -48,7 +48,11 @@
     - name: Fetch the variables from var file
       include_vars:
         file: vars.yml
-
+        
+    - name: Fetch tower variables from var file
+      include_vars:
+        file: install_vars.yml
+        
     - name: Copy the towerperf ssh private key
       include_role:
         name: copy_key
