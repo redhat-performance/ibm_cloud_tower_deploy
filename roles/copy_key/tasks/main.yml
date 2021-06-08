@@ -1,6 +1,6 @@
 ---
 - name: copy the root private key
   copy:
-    src: ../towerperf/conf/towerperf_id_rsa
+    src: conf/towerperf_id_rsa
     dest: /root/.ssh/id_rsa
     mode: '0600'
