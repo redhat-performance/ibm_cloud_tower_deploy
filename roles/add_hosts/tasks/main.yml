@@ -5,7 +5,7 @@
     ansible_user: root
     groups: tower
     ansible_ssh_extra_args: -o StrictHostKeyChecking=no
-    ansible_ssh_private_key_file: towerperf/conf/towerperf_id_rsa
+    ansible_ssh_private_key_file: conf/towerperf_id_rsa
   loop: "{{ tower_node }}"
 
 - name: Add Database node to database group
@@ -14,5 +14,5 @@
     ansible_user: root
     groups: database
     ansible_ssh_extra_args: -o StrictHostKeyChecking=no
-    ansible_ssh_private_key_file: towerperf/conf/towerperf_id_rsa
+    ansible_ssh_private_key_file: conf/towerperf_id_rsa
   loop: "{{ db_node }}"
