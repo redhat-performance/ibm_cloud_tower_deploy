@@ -52,3 +52,22 @@
     src: inventory_towerperf.j2
     dest: "{{ playbook_dir }}/../conf/inventory_towerperf_ibm_cloud"
   delegate_to: localhost
+
+- name: Load manifest into variable
+  local_action:
+    module: slurp
+    src: "{{ playbook_dir }}/../playbooks/setup/files/manifest.zip"
+  register: manifest_file
+  delegate_to: localhost
+
+- name: Post manifest file
+  uri:
+    url: https://{{ansible_host}}/api/v2/config/
+    method: POST
+    user: admin
+    password: "{{ admin_password }}"
+    body: '{ "eula_accepted": true, "manifest": "{{ manifest_file.content }}" }'
+    body_format: json
+    validate_certs: false
+    force_basic_auth: true
+
