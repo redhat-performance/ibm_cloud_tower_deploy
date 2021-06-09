@@ -45,7 +45,15 @@
   command: "./setup.sh -i inventory.cluster -e @install_vars.yml {{ EXTRA_SETUP_PARAMS|default('') }}"
   args:
     chdir: "/root/ansible-tower-setup"
-    creates: "/usr/bin/ansible-tower-service"
+    creates: "/usr/bin/ansible-tower-service
+  when: inventory_template == "inventory_cluster.j2"
+ 
+- name: "Running setup.sh"
+  command: "./setup.sh -i inventory.cluster -e @install_vars.yml {{ EXTRA_SETUP_PARAMS|default('') }}"
+  args:
+    chdir: "/root/ansible-tower-setup"
+    creates: "/usr/bin/automation-controller-service"
+  when: inventory_template == "inventory_cluster_4.j2"
 
 - name: Create Inventory file for towerperf Monitoring and Benchmarking
   template:
