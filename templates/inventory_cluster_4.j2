@@ -1,0 +1,17 @@
+[automationcontroller]
+{% for host in groups['tower'] %}
+{{ host }} 
+{% endfor %}{# for host in groups['tower'] #}
+
+
+[database]
+{% for host in groups['database'] %}
+{{ host }}
+{% endfor %}{# for host in groups['database'] #}
+
+[all:vars]
+# PG variables
+{% for host in groups['database'] %}
+pg_host="{{ host }}"
+pg_port="{{ pg_port | default('5432') }}"
+{% endfor %}{# for host in groups['database'] #}
