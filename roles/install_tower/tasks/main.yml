@@ -31,7 +31,7 @@
 
 - name: create the cluster install inventory
   template:
-    src: inventory_cluster.j2
+    src: "{{ inventory_template }}"
     dest: /root/ansible-tower-setup/inventory.cluster
 
 - name: "Create ansible configuration file"
