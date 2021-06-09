@@ -1,0 +1,18 @@
+---
+- name: Fetch VPC details
+  ibm.cloudcollection.ibm_is_vpc_info:
+    name: "{{ name_prefix }}-vpc"
+  register: vpc
+  ignore_errors: True
+
+- name: Fetch Security Group Details
+  ibm.cloudcollection.ibm_is_security_group_info:
+    name: "{{ vpc.resource.default_security_group_name }}"
+  register: security_group
+
+- name: "Delete Security Group Rule on the VSI"
+  ibm.cloudcollection.ibm_is_security_group:
+    state: absent
+    name: "{{ security_group.resource.name }}"
+    id: "{{ security_group.resource.id }}"
+  ignore_errors: True

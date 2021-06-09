@@ -1,0 +1,14 @@
+---
+- name: Fetch VPC details
+  ibm.cloudcollection.ibm_is_vpc_info:
+    name: "{{ name_prefix }}-vpc"
+  register: vpc
+  ignore_errors: True
+
+- name: Delete VPC
+  ibm.cloudcollection.ibm_is_vpc:
+    name: "{{ name_prefix }}-vpc"
+    id: "{{ vpc.resource.id }}"
+    state: absent
+  register: vpc_delete_output
+  ignore_errors: True

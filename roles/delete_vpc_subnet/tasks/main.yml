@@ -1,0 +1,22 @@
+---
+- name: Fetch VPC details
+  ibm.cloudcollection.ibm_is_vpc_info:
+    name: "{{ name_prefix }}-vpc"
+  register: vpc
+  ignore_errors: True
+
+- name: Fetch VPC Subnet
+  ibm.cloudcollection.ibm_is_subnet_info:
+    name: "{{ name_prefix }}-subnet"
+  register: subnet
+  ignore_errors: True
+
+- name: delete VPC Subnet
+  ibm.cloudcollection.ibm_is_subnet:
+    name: "{{ name_prefix }}-subnet"
+    vpc: "{{ vpc.resource.id}}"
+    zone: "{{ zone }}"
+    id: "{{ subnet.resource.id }}"
+    state: absent
+  register: subnet_delete_output
+  ignore_errors: True

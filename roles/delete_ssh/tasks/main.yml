@@ -1,0 +1,16 @@
+---
+- name: Fetch SSH Keys Details
+  ibm.cloudcollection.ibm_is_ssh_key_info:
+    name: "{{ name_prefix }}-ssh-key"
+  register: ssh_key
+  ignore_errors: True
+
+- name: Configure SSH Key
+  ibm.cloudcollection.ibm_is_ssh_key:
+    name: "{{ name_prefix }}-ssh-key"
+    public_key: "{{ ssh_public_key }}" 
+    id: "{{ ssh_key.resource.id }}"
+    state: absent
+  register: ssh_key_delete_output
+  ignore_errors: True
+
