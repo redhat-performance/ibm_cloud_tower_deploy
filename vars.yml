@@ -11,3 +11,4 @@ image_id: 'r022-939bbfe2-d823-4c01-98a3-a6f8193731d8'
 installation_tarball: https://releases.ansible.com/ansible-tower/setup-bundle/ansible-tower-setup-bundle-3.8.3-1.tar.gz
 number_of_tower_instance: 2
 list_of_ports: [22, 80, 443, 5432, 9121, 9256, 9117, 9393, 9392, 9187, 9100]
+inventory_template: 
