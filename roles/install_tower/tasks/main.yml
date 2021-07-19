@@ -7,13 +7,13 @@
 - name: "Download installation tarball"
   get_url:
     url: "{{ installation_tarball }}"
-    dest: "/root/{{ installation_tarball | basename }}"
+    dest: "/tmp/{{ installation_tarball | basename }}"
     force: no
   delegate_to: localhost
   
 - name: "Copy the installation tarball to Tower node"
   copy:
-    src: "/root/{{ installation_tarball | basename }}"
+    src: "/tmp/{{ installation_tarball | basename }}"
     dest: "/root/{{ installation_tarball | basename }}"
 
 - name: "Install tar before we attempt to unpack"
