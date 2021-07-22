@@ -10,6 +10,10 @@
     - name: Fetch the variables from var file
       include_vars:
         file: vars.yml
+
+    - name: Fetch the vaulted variables
+      include_vars:
+        file: config/credential.vault
   
     - name: Configure VPC
       include_role:
@@ -52,7 +56,11 @@
     - name: Fetch tower variables from var file
       include_vars:
         file: install_vars.yml
-        
+
+    - name: Fetch the vaulted variables
+      include_vars:
+        file: config/credential.vault
+
     - name: Copy the towerperf ssh private key
       include_role:
         name: copy_key
