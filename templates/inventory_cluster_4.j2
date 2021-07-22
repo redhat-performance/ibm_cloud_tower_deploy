@@ -15,3 +15,7 @@
 pg_host="{{ host }}"
 pg_port="{{ pg_port | default('5432') }}"
 {% endfor %}{# for host in groups['database'] #}
+# registry variables
+registry_username='psi-ansible-tower'
+registry_url='https://registry.redhat.io/'
+registry_password="{{ redhat_password }}"
