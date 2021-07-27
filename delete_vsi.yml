@@ -40,7 +40,6 @@
     keys:
       - "{{ ssh_key.resource.id }}"
     zone: "{{ zone }}"
-    image: "{{ image_id }}"
     wait_before_delete: True
   register: vsi_delete_output
   ignore_errors: True
