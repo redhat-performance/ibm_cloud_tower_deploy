@@ -36,10 +36,8 @@
     name: "{{ name_prefix }}{{ item }}-vsi"
     state: absent
     id: "{{ vsi.resource.id }}"
-    vpc: "{{ vpc.resource.id }}"
-    keys:
-      - "{{ ssh_key.resource.id }}"
     zone: "{{ zone }}"
+    instance_template: ""
     wait_before_delete: True
   register: vsi_delete_output
   ignore_errors: True
