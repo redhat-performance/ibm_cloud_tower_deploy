@@ -13,7 +13,7 @@
 
     - name: Delete the VM's
       include_tasks: delete_vsi.yml
-      loop: "{{ range(0, number_of_tower_instance + 1, 1)|list }}"
+      loop: "{{ range(1, ic_instance | int + 1, 1)|list }}"
 
     - name: Delete SSH Key
       include_role:
@@ -22,10 +22,6 @@
     - name: Delete VPC Subnet
       include_role:
         name: delete_vpc_subnet
-
-    - name: Delete Security Group
-      include_role:
-        name: delete_security_group
 
     - name: Delete VPC
       include_role:

@@ -2,8 +2,8 @@
 - name: Create IBM Cloud VPC VSI
   hosts: localhost
   vars:
-    - tower_node: []
-    - db_node: []   
+    tower_node: []
+    db_node: []   
   collections:
    - ibm.cloudcollection
   tasks:
@@ -11,10 +11,6 @@
       include_vars:
         file: vars.yml
 
-    - name: Fetch the vaulted variables
-      include_vars:
-        file: config/credential.vault
-  
     - name: Configure VPC
       include_role:
         name: configure_vpc
@@ -29,7 +25,7 @@
 
     - name: Install the VM's
       include_tasks: create_vsi.yml
-      loop: "{{ range(0, number_of_tower_instance + 1, 1)|list }}"
+      loop: "{{ range(1, ic_instance |int + 1, 1)|list }}"
 
     - name: Configure Security Group Rule
       include_role:
@@ -38,6 +34,14 @@
     - name: Add VM's to Tower and Database group
       include_role:
         name: add_hosts
+      when: install_tower | default('True') | bool
+
+    - name: Print IBM Cloud Instance Floating IPs
+      debug:
+        msg: 
+          - "IC instance Floating IP: "
+          - "{{ tower_node + db_node }}"
+      when: not install_tower | default('True') | bool 
 
 - name: Check Ansible connection to new DEMO VSI
   hosts: tower database
@@ -48,6 +52,7 @@
 
 - name: Check Ansible connection to new DEMO VSI
   hosts: tower[0]
+  gather_facts: False
   tasks:
     - name: Fetch the variables from var file
       include_vars:
