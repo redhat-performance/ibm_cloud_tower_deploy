@@ -32,6 +32,7 @@ Login to IBM cloud and list the available geographical regions under your accoun
 
       ibmcloud regions
 
+      ibmcloud target -r jp-tok #point to new targeted region
 
 ```
 [cmusali@cmusali ibm_cloud_tower_deploy]$ ibmcloud login
@@ -73,7 +74,7 @@ Create a `IC_REGION` env variable
 
     export IC_REGION="<region Name>"
 
-List instance profiles in the region
+List instance profiles in the region `jp-tok`
 
     ibmcloud is instance-profiles
 
@@ -92,7 +93,7 @@ bx2-32x128      amd64          balanced   32      128           64000           
 bx2d-32x128     amd64          balanced   32      128           64000             16000                    -      2x600   
 ```
 
-List all the available images in the region
+List all the available images in the region `jp-tok`
 
     ibmcloud is images
 
