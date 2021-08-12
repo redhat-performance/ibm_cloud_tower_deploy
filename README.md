@@ -12,7 +12,7 @@ Looking for virtual cloud instances ??
 
 Install Ansible modules collection for IBM cloud
 
-    ansible-galaxy collection install awx.awx
+    ansible-galaxy collection install ibm.cloudcollection  
 
 Install IBM Cloud CLI tool to see the available instance-profiles(m4.large, m4.xlarge), OS-images, and etc...
 
