@@ -167,4 +167,4 @@ Destroy IBM Cloud Instances
 
 Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
 
-    ansible-playbook create.yml -e ic_instance=2 -e name_prefix='perf-scale-test'
+    ansible-playbook cleanup.yml -e ic_instance=2 -e name_prefix='perf-scale-test'
