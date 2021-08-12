@@ -41,7 +41,6 @@
         msg: 
           - "IC instance Floating IP: "
           - "{{ tower_node + db_node }}"
-      when: not install_tower | default('True') | bool 
 
 - name: Check Ansible connection to new DEMO VSI
   hosts: tower database
