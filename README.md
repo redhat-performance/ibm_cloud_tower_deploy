@@ -1,1 +1,170 @@
-# ibm_cloud_tower_deploy
+Create and Destroy IBM Cloud Instances
+=======================================
+
+Tower CPT was broken due to increase in the disk IOPS requirements in Ansible Tower v4.0.0. So it made us to migrate from in-house VMs to IBM cloud VSI.
+
+We believe there are two use cases associated with this repo and these are our primitive attempts to describe it.
+1. Looking for virtual cloud instances (OR)
+2. Looking for Tower deployment on faster disks
+
+Looking for virtual cloud instances ??
+------------------------------------
+
+Install Ansible modules collection for IBM cloud
+
+    ansible-galaxy collection install ibm.cloudcollection  
+
+Install IBM Cloud CLI tool to see the available instance-profiles(m4.large, m4.xlarge), OS-images, and etc...
+
+    curl -sL https://raw.githubusercontent.com/IBM-Cloud/ibm-cloud-developer-tools/master/linux-installer/idt-installer | bash
+
+    ibmcloud plugin install vpc-infrastructure
+
+Make sure you have IBM Cloud API key to authenticate with the IBM Cloud platform.
+
+Create an `IC_API_KEY` env variable
+
+    export IC_API_KEY="<your-api-key>"
+
+Login to IBM cloud and list the available geographical regions under your account
+
+      ibmcloud login
+
+      ibmcloud regions
+
+      ibmcloud target -r jp-tok #point to new targeted region
+
+```
+[cmusali@cmusali ibm_cloud_tower_deploy]$ ibmcloud login
+API endpoint: https://cloud.ibm.com
+Region: jp-tok
+Authenticating...
+OK
+
+Targeted account Performance-Scale (XXXXXXXXXXXXXXXXX)
+
+
+API endpoint:      https://cloud.ibm.com   
+Region:            jp-tok   
+User:              ServiceId-XXXXXXXXXXXXXXXXXXxx   
+Account:           Performance-Scale (XXXXXXXXXXXXXXXXXX)   
+Resource group:    No resource group targeted, use 'ibmcloud target -g RESOURCE_GROUP'   
+CF API endpoint:      
+Org:                  
+Space:    
+
+[cmusali@cmusali ibm_cloud_tower_deploy]$ ibmcloud regions
+Listing regions...
+
+Name       Display name   
+au-syd     Sydney   
+in-che     Chennai   
+jp-osa     Osaka   
+jp-tok     Tokyo   
+kr-seo     Seoul   
+eu-de      Frankfurt   
+eu-gb      London   
+ca-tor     Toronto   
+us-south   Dallas   
+us-east    Washington DC   
+br-sao     Sao Paulo   
+```
+
+Create a `IC_REGION` env variable
+
+    export IC_REGION="<region Name>"
+
+List instance profiles in the region `jp-tok`
+
+    ibmcloud is instance-profiles
+
+```
+Listing instance profiles in region jp-tok under account Performance-Scale as user ServiceId-XXXXXXXXXXXXXXXXX...
+Name            Architecture   Family     vCPUs   Memory(GiB)   Bandwidth(Mbps)   Volume bandwidth(Mbps)   GPUs   Storage(GB)   
+bx2-2x8         amd64          balanced   2       8             4000              1000                     -      -   
+bx2d-2x8        amd64          balanced   2       8             4000              1000                     -      1x75   
+bx2-4x16        amd64          balanced   4       16            8000              2000                     -      -   
+bx2d-4x16       amd64          balanced   4       16            4000              1000                     -      1x150   
+bx2-8x32        amd64          balanced   8       32            16000             4000                     -      -   
+bx2d-8x32       amd64          balanced   8       32            16000             4000                     -      1x300   
+bx2-16x64       amd64          balanced   16      64            32000             8000                     -      -   
+bx2d-16x64      amd64          balanced   16      64            32000             8000                     -      1x600   
+bx2-32x128      amd64          balanced   32      128           64000             16000                    -      -   
+bx2d-32x128     amd64          balanced   32      128           64000             16000                    -      2x600   
+```
+
+List all the available images in the region `jp-tok`
+
+    ibmcloud is images
+
+
+```
+Listing images in all resource groups and region jp-tok under account Performance-Scale as user ServiceId-8cd111e5-14e8-4f45-897b-27d440a90012...
+ID                                          Name                                               Status       Arch    OS name                              OS version                                File size(GB)   Visibility   Owner type   Encryption   Resource group   
+r022-f10e4ea0-1f0b-4fb6-8cfd-1c9aad475046   ibm-centos-7-9-minimal-amd64-3                     available    amd64   centos-7-amd64                       7.x - Minimal Install                     1               public       provider     none         -   
+r022-95e7a9a1-8707-49ea-bdef-693311570ce0   ibm-centos-8-3-minimal-amd64-3                     available    amd64   centos-8-amd64                       8.x - Minimal Install                     1               public       provider     none         -   
+r022-0fd54b16-2f03-4f8c-8045-38f9781e9071   ibm-debian-10-8-minimal-amd64-1                    available    amd64   debian-10-amd64                      10.x Buster/Stable - Minimal Install      1               public       provider     none         -   
+r022-54098fbc-4285-4fc3-aa20-d9da85781fa5   ibm-debian-9-13-minimal-amd64-4                    available    amd64   debian-9-amd64                       9.x Stretch/Stable - Minimal Install      1               public       provider     none         -   
+r022-f5387730-7a4b-4f71-9a85-13b05b137953   ibm-redhat-7-6-amd64-sap-applications-1            available    amd64   red-7-amd64-sap-applications         7.x for Applications                      2               public       provider     none         -   
+r022-60d279a0-b328-40eb-a379-595ca53bee18   ibm-redhat-7-6-amd64-sap-hana-1                    available    amd64   red-7-amd64-sap-hana                 7.6 for SAP HANA                          2               public       provider     none         -   
+r022-71ecd746-b847-4fc4-8144-1ad5ca7095fc   ibm-redhat-7-9-minimal-amd64-3                     available    amd64   red-7-amd64                          7.x - Minimal Install                     1               public       provider     none         -   
+```
+
+Default confing file `vars.yml`
+
+    name_prefix: 'perf-scale-test'  #Used as prefix when creating various resources
+    vsi_profile: 'bx2-4x16'   #type of instance, balanced 2 vCPUs and 16 GiB Memory
+    image_id: 'r022-939bbfe2-d823-4c01-98a3-a6f8193731d8' #OS image ID
+    ssh_public_key: <your ssh public key> #cat ~/.ssh/id_rsa.pub
+    ic_instance: 3 #Number of required IBM cloud instances
+    list_of_ports: [22, 80, 443] #open port to access
+
+Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
+
+    ansible-playbook create.yml -e ic_instance=2 \
+                                -e name_prefix='perf-scale-test' \
+                                -e vsi_profile='bx2-4x16' \
+                                -e image_id='r014-02843c52-e12b-4f72-a631-931b4bf6589d' \
+                                -e install_tower=False
+```
+TASK [Print IBM Cloud Instance Floating IPs] ***************************************************************************************************************************************
+ok: [localhost] => {
+    "msg": [
+        "IC instance Floating IP: ",
+        [
+            "169.63.178.143",
+            "169.59.164.19"
+        ]
+    ]
+}
+```
+```
+[cmusali@cmusali ibm_cloud_tower_deploy]$ cat > ic_instance_inventory.ini
+[ic_servers]
+ic1 ansible_host=169.63.178.143
+ic2 ansible_host=169.59.164.19
+
+
+[ic_servers:vars]
+ansible_user = 'root'          
+ansible_ssh_private_key_file=conf/towerperf_id_rsa
+^C
+```
+
+Looking for Tower deployment on faster disks
+---------------------------------------------
+
+Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
+
+    ansible-playbook create.yml -e ic_instance=2 \
+                                -e name_prefix='perf-scale-test' \
+                                -e vsi_profile='bx2-4x16' \
+                                -e image_id='r014-02843c52-e12b-4f72-a631-931b4bf6589d'
+
+
+Destroy IBM Cloud Instances
+----------------------------
+
+Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
+
+    ansible-playbook create.yml -e ic_instance=2 -e name_prefix='perf-scale-test'
