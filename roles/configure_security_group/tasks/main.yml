@@ -1,5 +1,5 @@
 ---
-- name: "Configure Security Group Rule to open {{ item }} on the VSI"
+- name: "Configure Security Group Rule to open certain ports on the VSI"
   ibm.cloudcollection.ibm_is_security_group_rule:
     state: available
     group: "{{ vpc.default_security_group }}"
@@ -8,7 +8,7 @@
     tcp:
       - port_max: "{{ item }}"
         port_min: "{{ item }}"
-  loop: "{{  list_of_ports  }}"
+  loop: "{{ list_of_ports }}"
 
 - name: "Configure Security Group Rule to open icmp on the VSI"
   ibm.cloudcollection.ibm_is_security_group_rule:

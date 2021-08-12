@@ -1,12 +1,12 @@
 ---
 - name: Fetch Floating IP of the VM's
-  ibm_is_floating_ip_info:
+  ibm.cloudcollection.ibm_is_floating_ip_info:
     name: "{{ name_prefix }}{{ item }}-fip"
   register: fip
   ignore_errors: True
 
 - name: Delete Floating IP Address
-  ibm_is_floating_ip:
+  ibm.cloudcollection.ibm_is_floating_ip:
     name: "{{ name_prefix }}{{ item }}-fip"
     state: absent
     id: "{{ fip.resource.id }}"
@@ -14,29 +14,23 @@
   ignore_errors: True
 
 - name: Fetch VSI details
-  ibm_is_instance_info:
+  ibm.cloudcollection.ibm_is_instance_info:
     name: "{{ name_prefix }}{{ item }}-vsi"
   register: vsi
   ignore_errors: True
 
 - name: Fetch VPC details
-  ibm_is_vpc_info:
+  ibm.cloudcollection.ibm_is_vpc_info:
     name: "{{ name_prefix }}-vpc"
   register: vpc
   ignore_errors: True
 
-- name: Fetch SSH Keys Details
-  ibm_is_ssh_key_info:
-    name: "{{ name_prefix }}-ssh-key"
-  register: ssh_key
-  ignore_errors: True
-
 - name: Delete VSI
-  ibm_is_instance:
+  ibm.cloudcollection.ibm_is_instance:
     name: "{{ name_prefix }}{{ item }}-vsi"
     state: absent
     id: "{{ vsi.resource.id }}"
-    zone: "{{ zone }}"
+    zone: "{{ vpc.resource.subnets[-1].zone }}"
     instance_template: ""
     wait_before_delete: True
   register: vsi_delete_output

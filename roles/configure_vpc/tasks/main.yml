@@ -10,3 +10,20 @@
   set_fact:
     cacheable: True
     vpc: "{{ vpc_create_output.resource }}"
+
+- name: Retrieve VPC Address prefixes
+  ibm.cloudcollection.ibm_is_vpc_address_prefixes_info:
+    vpc: "{{ vpc.id }}"
+  register: vpc_address_prefixes
+
+- name: Save VPC zones as fact
+  set_fact:  
+    vpc_zone_name_cidr: "{{  vpc_zone_name | default([]) + [ { 'name': item.zone[0].name, 'cidr': item.cidr } ] }}"
+  loop: "{{ vpc_address_prefixes.resource.address_prefixes }}"
+  loop_control:
+    label: "{{ item.zone[0].name }}"
+
+- name: Save VPC zone and cidr mapping
+  set_fact:
+    vpc_zone: "{{ vpc_zone_name_cidr | random }}" 
+

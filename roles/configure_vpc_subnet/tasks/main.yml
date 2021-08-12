@@ -5,9 +5,8 @@
     state: available
     id: "{{ subnet.id | default(omit) }}"
     vpc: "{{ vpc.id }}"
-     #total_ipv4_address_count: "{{ total_ipv4_address_count }}"
-    ipv4_cidr_block: "{{ ipv4_cidr_block }}"
-    zone: "{{ zone }}"
+    ipv4_cidr_block: "{{ vpc_zone.cidr }}"
+    zone: "{{ vpc_zone.name }}"
   register: subnet_create_output
 
 - name: Save VPC Subnet as fact
