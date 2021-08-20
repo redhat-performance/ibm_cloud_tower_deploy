@@ -1,6 +1,0 @@
----
-admin_password: 'password'
-pg_password: 'password'
-pg_database: 'awx'
-pg_username: 'awx'
-
