@@ -2,6 +2,7 @@
 - name: Fetch VPC details
   ibm.cloudcollection.ibm_is_vpc_info:
     name: "{{ name_prefix }}-vpc"
+    region: "{{ ibmcloud_ic_region }}"
   register: vpc
   ignore_errors: True
 
@@ -10,5 +11,6 @@
     name: "{{ name_prefix }}-vpc"
     id: "{{ vpc.resource.id }}"
     state: absent
+    region: "{{ ibmcloud_ic_region }}"
   register: vpc_delete_output
   ignore_errors: True

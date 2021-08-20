@@ -2,15 +2,17 @@
 - name: Fetch VPC Subnet
   ibm.cloudcollection.ibm_is_subnet_info:
     name: "{{ name_prefix }}-subnet"
+    region: "{{ ibmcloud_ic_region }}"
   register: subnet
   ignore_errors: True
 
-- name: delete VPC Subnet
+- name: Delete VPC Subnet
   ibm.cloudcollection.ibm_is_subnet:
     name: "{{ name_prefix }}-subnet"
     vpc: "{{ subnet.resource.vpc }}"
     zone: "{{ subnet.resource.zone }}"
     id: "{{ subnet.resource.id }}"
+    region: "{{ ibmcloud_ic_region }}"
     state: absent
   register: subnet_delete_output
   ignore_errors: True
