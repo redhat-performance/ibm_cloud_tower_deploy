@@ -56,6 +56,10 @@
     - name: Fetch the variables from var file
       include_vars:
         file: vars.yml
+
+    - name: Fetch the tower vars file
+      include_vars:
+        file: tower_vars.yml
         
     - name: Fetch the vaulted variables
       include_vars:
