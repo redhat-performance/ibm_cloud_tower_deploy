@@ -35,10 +35,6 @@
     src: install_vars.j2
     dest: /root/ansible-tower-setup/install_vars.yml
 
-- name: "Read the install vars file"
-  include_vars:
-
-
 - name: create the cluster install inventory
   template:
     src: "{{ inventory_template }}"
