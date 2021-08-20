@@ -3,7 +3,8 @@
   ibm.cloudcollection.ibm_is_vpc:
     name: "{{ name_prefix }}-vpc"
     state: available
-    id: "{{ vpc.id | default(omit) }}"
+    #id: "{{ vpc.id | default(omit) }}"
+    region: "{{ ibmcloud_ic_region }}"
   register: vpc_create_output
 
 - name: Save VPC as fact
@@ -14,6 +15,7 @@
 - name: Retrieve VPC Address prefixes
   ibm.cloudcollection.ibm_is_vpc_address_prefixes_info:
     vpc: "{{ vpc.id }}"
+    region: "{{ ibmcloud_ic_region }}"
   register: vpc_address_prefixes
 
 - name: Save VPC zones as fact
@@ -25,5 +27,4 @@
 
 - name: Save VPC zone and cidr mapping
   set_fact:
-    vpc_zone: "{{ vpc_zone_name_cidr | random }}" 
-
+    vpc_zone: "{{ vpc_zone_name_cidr | random }}"
