@@ -57,10 +57,6 @@
       include_vars:
         file: vars.yml
         
-    - name: Fetch tower variables from var file
-      include_vars:
-        file: install_vars.yml
-
     - name: Fetch the vaulted variables
       include_vars:
         file: config/credential.vault
