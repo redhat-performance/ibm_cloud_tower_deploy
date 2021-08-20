@@ -12,6 +12,7 @@
      primary_network_interface:
        - subnet: "{{ subnet.id }}"
      zone: "{{ vpc_zone.name }}"
+     region: "{{ ibmcloud_ic_region }}"
   register: vsi_create_output
 
 - name: Save VSI as fact
@@ -23,6 +24,7 @@
   ibm.cloudcollection.ibm_is_floating_ip:
      name: "{{ name_prefix }}{{ item }}-fip"
      state: available
+     region: "{{ ibmcloud_ic_region }}"
      #id: "{{ fip.id | default(omit) }}"
      target: "{{ vsi.primary_network_interface[0]['id'] }}"
   register: fip_create_output
@@ -30,11 +32,4 @@
 - name: Save Floating IPs 
   set_fact:
      cacheable: True
-     tower_node: "{{ tower_node + [fip_create_output.resource.address] }}"
-  when: item != ic_instance 
-
-- name: Save Floating IPs
-  set_fact:
-     cacheable: True
-     db_node: "{{ db_node + [fip_create_output.resource.address] }}"
-  when: item == ic_instance
+     ibmcloud_vsi_node: "{{ ibmcloud_vsi_node|default([]) + [fip_create_output.resource.address] }}"
