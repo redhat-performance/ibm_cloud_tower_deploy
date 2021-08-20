@@ -30,9 +30,9 @@
       - "--strip-components=1"
     creates: "/root/ansible-tower-setup/inventory"
 
-- name: "Copy the install vars file"
-  copy:
-    src: install_vars.yml
+- name: "Create the install vars file"
+  template:
+    src: install_vars.j2
     dest: /root/ansible-tower-setup/install_vars.yml
 
 - name: create the cluster install inventory

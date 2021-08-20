@@ -1,0 +1,11 @@
+---
+admin_password: 'password'
+pg_password: 'password'
+pg_database: 'awx'
+pg_username: 'awx'
+{% if 'devel' in installation_tarball %}
+  global_job_execution_environments:
+    - name: Controller Default EE
+      image: {{ global_ee }}
+  control_plane_execution_environment: {{ control_plane_ee }}
+{% endif %}
