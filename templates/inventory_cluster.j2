@@ -3,6 +3,15 @@
 {{ host }} 
 {% endfor %}{# for host in groups['tower'] #}
 
+{% if groups['iso']|default([])|length > 0 %}
+[isolated_group_restrictedzone]
+{% for isonode in groups['iso'] %}
+{{ isonode }}
+{% endfor %}
+
+[isolated_group_restrictedzone:vars]
+controller=tower
+{% endif %}
 
 [database]
 {% for host in groups['database'] %}

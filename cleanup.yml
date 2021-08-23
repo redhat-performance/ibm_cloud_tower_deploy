@@ -1,11 +1,8 @@
 ---
-- name: Cleanup IBM Cloud VPC VSI
+- name: Cleanup IBM Cloud VPC VSI Related to Tower and Database Nodes
   hosts: localhost
-  vars:
-    - tower_node: []
-    - db_node: []
   collections:
-   - ibm.cloudcollection
+  - ibm.cloudcollection
   tasks:
     - name: Fetch the variables from var file
       include_vars:
@@ -13,16 +10,79 @@
 
     - name: Delete the VM's
       include_tasks: delete_vsi.yml
-      loop: "{{ range(1, ic_instance | int + 1, 1)|list }}"
+      loop: "{{ range(1, ic_instance|int + 1, 1)|list }}"
+      vars:
+        name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
+        ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
+        ic_instance: "{{ ibmcloud_vsi_count|int }}"
 
+    - name: Delete the VM's
+      include_tasks: delete_vsi.yml
+      loop: "{{ range(ic_instance|int + 1, ic_instance|int + 2, 1)|list }}"
+      vars:
+        name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
+        ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
+        ic_instance: "{{ ibmcloud_vsi_count|int }}"
+      when: install_tower | bool
+        
     - name: Delete SSH Key
       include_role:
         name: delete_ssh
+      vars:
+        name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
+        ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
 
     - name: Delete VPC Subnet
       include_role:
         name: delete_vpc_subnet
+      vars:
+        name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
+        ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
 
     - name: Delete VPC
       include_role:
         name: delete_vpc
+      vars:
+        name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
+        ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
+
+- name: Cleanup IBM Cloud VPC VSI Related to Isolated Nodes
+  hosts: localhost
+  collections:
+  - ibm.cloudcollection
+  tasks:
+  - name: Should I Delete Isolated Nodes ??
+    when: install_iso|bool and ibmcloud_vsi_iso_instance_count|int > 0
+    block:
+    - name: Fetch the variables from var file
+      include_vars:
+        file: vars.yml
+
+    - name: Delete the VM's
+      include_tasks: delete_vsi.yml
+      loop: "{{ range(1, ic_instance|int + 1, 1)|list }}"
+      vars:
+        name_prefix: "{{ ibmcloud_vpc_iso_name_prefix }}"
+        ibmcloud_ic_region: "{{ ibmcloud_vpc_iso_region }}"
+        ic_instance: "{{ ibmcloud_vsi_iso_instance_count|int }}"
+
+    - name: Delete SSH Key
+      include_role:
+        name: delete_ssh
+      vars:
+        name_prefix: "{{ ibmcloud_vpc_iso_name_prefix }}"
+        ibmcloud_ic_region: "{{ ibmcloud_vpc_iso_region }}"
+
+    - name: Delete VPC Subnet
+      include_role:
+        name: delete_vpc_subnet
+      vars:
+        name_prefix: "{{ ibmcloud_vpc_iso_name_prefix }}"
+        ibmcloud_ic_region: "{{ ibmcloud_vpc_iso_region }}"
+
+    - name: Delete VPC
+      include_role:
+        name: delete_vpc
+      vars:
+        name_prefix: "{{ ibmcloud_vpc_iso_name_prefix }}"
+        ibmcloud_ic_region: "{{ ibmcloud_vpc_iso_region }}"

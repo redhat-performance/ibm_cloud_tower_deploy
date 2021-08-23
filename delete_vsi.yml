@@ -2,6 +2,7 @@
 - name: Fetch Floating IP of the VM's
   ibm.cloudcollection.ibm_is_floating_ip_info:
     name: "{{ name_prefix }}{{ item }}-fip"
+    region: "{{ ibmcloud_ic_region }}"
   register: fip
   ignore_errors: True
 
@@ -10,18 +11,21 @@
     name: "{{ name_prefix }}{{ item }}-fip"
     state: absent
     id: "{{ fip.resource.id }}"
+    region: "{{ ibmcloud_ic_region }}"
   register: fip_delete_output
   ignore_errors: True
 
 - name: Fetch VSI details
   ibm.cloudcollection.ibm_is_instance_info:
     name: "{{ name_prefix }}{{ item }}-vsi"
+    region: "{{ ibmcloud_ic_region }}"
   register: vsi
   ignore_errors: True
 
 - name: Fetch VPC details
   ibm.cloudcollection.ibm_is_vpc_info:
     name: "{{ name_prefix }}-vpc"
+    region: "{{ ibmcloud_ic_region }}"
   register: vpc
   ignore_errors: True
 
@@ -33,5 +37,6 @@
     zone: "{{ vpc.resource.subnets[-1].zone }}"
     instance_template: ""
     wait_before_delete: True
+    region: "{{ ibmcloud_ic_region }}"
   register: vsi_delete_output
   ignore_errors: True
