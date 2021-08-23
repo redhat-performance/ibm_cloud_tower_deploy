@@ -24,7 +24,7 @@ ibmcloud_vpc_iso_region: 'eu-gb'    # London
 ibmcloud_vsi_iso_image_name: 'ibm-redhat-8-3-minimal-amd64-3'
 ibmcloud_vsi_iso_image_id: 'r018-179f9b5c-0e4d-4614-8fbb-07e8ec55a493'
 ibmcloud_vsi_iso_profile: 'bx2-4x16'
-ibmcloud_vsi_iso_instance_count: 0
+ibmcloud_vsi_iso_instance_count: 1
 install_iso: False 
 
 # Required ports for SSH, Tower, Exporters
