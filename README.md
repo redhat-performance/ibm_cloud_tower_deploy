@@ -70,10 +70,6 @@ us-east    Washington DC
 br-sao     Sao Paulo   
 ```
 
-Create a `IC_REGION` env variable
-
-    export IC_REGION="<region Name>"
-
 List instance profiles in the region `jp-tok`
 
     ibmcloud is instance-profiles
@@ -110,21 +106,13 @@ r022-60d279a0-b328-40eb-a379-595ca53bee18   ibm-redhat-7-6-amd64-sap-hana-1     
 r022-71ecd746-b847-4fc4-8144-1ad5ca7095fc   ibm-redhat-7-9-minimal-amd64-3                     available    amd64   red-7-amd64                          7.x - Minimal Install                     1               public       provider     none         -   
 ```
 
-Default confing file `vars.yml`
-
-    name_prefix: 'perf-scale-test'  #Used as prefix when creating various resources
-    vsi_profile: 'bx2-4x16'   #type of instance, balanced 2 vCPUs and 16 GiB Memory
-    image_id: 'r022-939bbfe2-d823-4c01-98a3-a6f8193731d8' #OS image ID
-    ssh_public_key: <your ssh public key> #cat ~/.ssh/id_rsa.pub
-    ic_instance: 3 #Number of required IBM cloud instances
-    list_of_ports: [22, 80, 443] #open port to access
+Launch Plain IBM Cloud Instances
+---------------------------------
 
 Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
 
-    ansible-playbook create.yml -e ic_instance=2 \
-                                -e name_prefix='perf-scale-test' \
-                                -e vsi_profile='bx2-4x16' \
-                                -e image_id='r014-02843c52-e12b-4f72-a631-931b4bf6589d' \
+    ansible-playbook create.yml -e ibmcloud_vsi_count=2 \
+                                -e ibmcloud_vpc_name_prefix='perf-scale-test' \
                                 -e install_tower=False
 ```
 TASK [Print IBM Cloud Instance Floating IPs] ***************************************************************************************************************************************
@@ -151,20 +139,58 @@ ansible_ssh_private_key_file=conf/towerperf_id_rsa
 ^C
 ```
 
-Looking for Tower deployment on faster disks
----------------------------------------------
-
-Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
-
-    ansible-playbook create.yml -e ic_instance=2 \
-                                -e name_prefix='perf-scale-test' \
-                                -e vsi_profile='bx2-4x16' \
-                                -e image_id='r014-02843c52-e12b-4f72-a631-931b4bf6589d'
-
-
 Destroy IBM Cloud Instances
 ----------------------------
 
 Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
 
-    ansible-playbook cleanup.yml -e ic_instance=2 -e name_prefix='perf-scale-test'
+    ansible-playbook cleanup.yml -e ibmcloud_vsi_count=2 \
+                                 -e ibmcloud_vpc_name_prefix='perf-scale-test' \
+                                 -e install_tower=False
+
+
+Looking for Tower deployment on faster disks
+---------------------------------------------
+
+Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
+
+    ansible-playbook create.yml -e ibmcloud_vsi_count=2 \
+                                -e ibmcloud_vpc_name_prefix='perf-scale-test'
+
+
+Destroy IBM Cloud Instances If Tower is Deployed
+------------------------------------------------
+
+Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
+
+    ansible-playbook cleanup.yml -e ibmcloud_vsi_count=2 \
+                                 -e ibmcloud_vpc_name_prefix='perf-scale-test'
+
+
+Looking for Tower deployment with Isolated Nodes
+------------------------------------------------
+    ansible-playbook create.yml -e ibmcloud_vsi_count=2 \
+                                -e ibmcloud_vpc_name_prefix='perf-scale-test' \
+                                -e install_iso=True
+
+
+Destroy IBM Cloud Instances If Tower is Deployed with Isolated Nodes
+--------------------------------------------------------------------
+
+Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
+
+        ansible-playbook cleanup.yml -e ibmcloud_vsi_count=2 \
+                                     -e ibmcloud_vpc_name_prefix='perf-scale-test' \
+                                     -e install_iso=True
+
+To Take Control Over the Default Configuration Values
+------------------------------------------------------
+
+Default confing file `vars.yml`
+
+    ibmcloud_vpc_region: 'jp-tok'  # Region for creating IBM cloud instances
+    ibmcloud_vpc_name_prefix: 'perf-scale-test'  # Used as prefix when creating various resources
+    ibmcloud_vsi_profile: 'bx2-4x16'   # Type of IBM cloud instance, balanced 2 vCPUs and 16 GiB Memory
+    ibmcloud_vsi_image_id: 'r022-939bbfe2-d823-4c01-98a3-a6f8193731d8' # OS image ID
+    ibmcloud_vsi_count: 3 # Number of required IBM cloud instances
+    list_of_ports: [22, 80, 443] # List of ports to open on the IBM cloud instances
