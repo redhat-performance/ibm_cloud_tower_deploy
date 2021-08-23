@@ -14,8 +14,17 @@
       vars:
         name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
-        ic_instance: "{{ ibmcloud_vsi_db_count|int + ibmcloud_vsi_count|int }}"
+        ic_instance: "{{ ibmcloud_vsi_count|int }}"
 
+    - name: Delete the VM's
+      include_tasks: delete_vsi.yml
+      loop: "{{ range(ic_instance|int + 1, ic_instance|int + 2, 1)|list }}"
+      vars:
+        name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
+        ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
+        ic_instance: "{{ ibmcloud_vsi_count|int }}"
+      when: install_tower | bool
+        
     - name: Delete SSH Key
       include_role:
         name: delete_ssh

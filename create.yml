@@ -45,19 +45,25 @@
 
     - name: Install the VM's for Database
       include_tasks: create_vsi.yml
-      loop: "{{ range(ibmcloud_vsi_count|int + 1, ic_instance|int + 1, 1)|list }}"
+      loop: "{{ range(ic_instance|int + 1, ic_instance|int + 2, 1)|list }}"
       vars:
         name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
         vsi_profile: "{{ ibmcloud_vsi_db_profile }}"
         image_id: "{{ ibmcloud_vsi_image_id }}"
-        ic_instance: "{{ ibmcloud_vsi_db_count|int + ibmcloud_vsi_count|int }}"
+        ic_instance: "{{ ibmcloud_vsi_count }}"
+      when: install_tower | bool
 
     - name: Save Floating IP's of Tower of Database
       set_fact:
         tower_node: "{{ ibmcloud_vsi_node[:ibmcloud_vsi_count|int:] }}"
+        cacheable: True
+
+    - name: Save Floating IP's of Tower of Database
+      set_fact:
         db_node: "{{ [ ibmcloud_vsi_node[-1] ] }}"
         cacheable: True
+      when: install_tower | bool
 
     - name: Configure Security Group Rule
       include_role:
@@ -75,8 +81,7 @@
       debug:
         msg: 
           - "IC instance Floating IP: "
-          - "Tower: {{ tower_node }}"
-          - "Database: {{ db_node }}"
+          - "{{ ibmcloud_vsi_node }}"
 
 - name: Create IBM Cloud VPC VSI for Tower Isolated Nodes
   hosts: localhost
@@ -126,7 +131,7 @@
 
     - name: Save Floating IP's of Isolated Nodes
       set_fact:
-        iso_node: "{{ ibmcloud_vsi_node[ibmcloud_vsi_count|int + ibmcloud_vsi_db_count|int::] }}"
+        iso_node: "{{ ibmcloud_vsi_node[ibmcloud_vsi_count|int + 1::] }}"
         cacheable: True
 
     - name: Configure Security Group Rule

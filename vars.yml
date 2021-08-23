@@ -15,7 +15,6 @@ install_tower: True
 
 # Ansible Tower and Tower database must be in the same 
 ibmcloud_vsi_db_profile: 'bx2-4x16'
-ibmcloud_vsi_db_count: 1    # Required database nodes should be always 1
 
 
 # Isolated Nodes must be in the different region compared to Controller
