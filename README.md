@@ -169,7 +169,9 @@ Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
 
 Looking for Tower deployment with Isolated Nodes
 ------------------------------------------------
-    ansible-playbook create.yml -e install_iso=True
+    ansible-playbook create.yml -e ibmcloud_vsi_count=2 \
+                                -e ibmcloud_vpc_name_prefix='perf-scale-test' \
+                                -e install_iso=True
 
 
 Destroy IBM Cloud Instances If Tower is Deployed with Isolated Nodes
