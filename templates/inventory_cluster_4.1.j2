@@ -1,0 +1,38 @@
+[automationcontroller]
+{% for host in groups['tower'] %}
+{{ host }} 
+{% endfor %}{# for host in groups['tower'] #}
+
+
+[database]
+{% for host in groups['database'] %}
+{{ host }}
+{% endfor %}{# for host in groups['database'] #}
+
+{% if groups['execution']|default([])|length > 0 %}
+[execution_nodes]
+{% for execution_node in groups['execution'] %}
+{{ execution_node }}
+{% endfor %}
+
+[execution_nodes:vars]
+peers=automationcontroller
+{% endif %}
+
+
+[all:vars]
+# PG variables
+{% for host in groups['database'] %}
+pg_host="{{ host }}"
+pg_port="{{ pg_port | default('5432') }}"
+{% endfor %}{# for host in groups['database'] #}
+# registry variables
+{% if 'devel' in installation_tarball %}
+  registry_username="{{ brew_registry_username }}"
+  registry_url="{{ brew_registry_url }}"
+  registry_password="{{ brew_registry_password }}"
+{% else %}
+  registry_username="{{ redhat_registry_username }}"
+  registry_url="{{ redhat_registry_url }}"
+  registry_password="{{ redhat_registry_password }}"
+{% endif %}
