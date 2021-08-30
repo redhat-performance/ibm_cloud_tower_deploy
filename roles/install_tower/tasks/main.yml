@@ -59,7 +59,7 @@
   args:
     chdir: "/root/ansible-tower-setup"
     creates: "/usr/bin/automation-controller-service"
-  when: inventory_template == "inventory_cluster_4.j2"
+  when: inventory_template == "inventory_cluster_4.j2" or inventory_template == "inventory_cluster_4.1.j2"
 
 - name: Create Inventory file for towerperf Monitoring and Benchmarking
   template:
