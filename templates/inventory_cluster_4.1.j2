@@ -1,8 +1,18 @@
+{% macro def_targets(target_group, target_lower_slice, target_upper_slice, target_type) %}
+{% for host in groups[target_group][target_lower_slice:target_upper_slice] %}
+{{ host }} node_type={{ target_type }}
+{% endfor %}
+{% endmacro %}
 [automationcontroller]
-{% for host in groups['tower'] %}
-{{ host }} node_type={{ control_plane_node_type | default('hybrid') }} 
-{% endfor %}{# for host in groups['tower'] #}
-
+{% set control_nodes = tower_control_nodes| default(0)| int %}
+{% set hybrid_nodes = tower_hyrid_nodes| default(0)| int %}
+{% set total_control_plane_nodes = control_nodes + hybrid_nodes %}
+{% if groups['tower']|length == total_control_plane_nodes %}
+{{ def_targets('tower', 0, control_nodes, 'control') }}
+{{ def_targets('tower', control_nodes, total_control_plane_nodes, 'hybrid') }}
+{% else %}
+{{ def_targets('tower', 0, groups['tower']|length, 'hybrid') }}
+{% endif %}
 
 [database]
 {% for host in groups['database'] %}
@@ -11,9 +21,15 @@
 
 {% if groups['execution']|default([])|length > 0 %}
 [execution_nodes]
-{% for execution_node in groups['execution'] %}
-{{ execution_node }} node_type={{ execution_plane_node_type | default('execution') }}
-{% endfor %}
+{% set execution_nodes = tower_execution_nodes| default(0)| int %}
+{% set hop_nodes = tower_hop_nodes| default(0)| int %}
+{% set total_execution_plane_nodes = execution_nodes + hop_nodes %}
+{% if execution_nodes >= 1 and groups['execution']|length == total_control_plane_nodes %}
+{{ def_targets('execution', 0, execution_nodes, 'execution') }}
+{{ def_targets('execution', execution_nodes, total_execution_plane_nodes, 'hop') }}
+{% else %}
+{{ def_targets('execution', 0, groups['execution']|length, 'execution') }}
+{% endif %}
 
 [execution_nodes:vars]
 peers=automationcontroller
