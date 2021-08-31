@@ -5,7 +5,7 @@
 {% endmacro %}
 [automationcontroller]
 {% set control_nodes = tower_control_nodes| default(0)| int %}
-{% set hybrid_nodes = tower_hyrid_nodes| default(0)| int %}
+{% set hybrid_nodes = tower_hybrid_nodes| default(0)| int %}
 {% set total_control_plane_nodes = control_nodes + hybrid_nodes %}
 {% if groups['tower']|length == total_control_plane_nodes %}
 {{ def_targets('tower', 0, control_nodes, 'control') }}
