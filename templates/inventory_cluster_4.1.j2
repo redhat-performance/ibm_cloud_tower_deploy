@@ -1,6 +1,6 @@
 [automationcontroller]
 {% for host in groups['tower'] %}
-{{ host }} 
+{{ host }} node_type={{ control_plane_node_type | default('hybrid') }} 
 {% endfor %}{# for host in groups['tower'] #}
 
 
@@ -12,7 +12,7 @@
 {% if groups['execution']|default([])|length > 0 %}
 [execution_nodes]
 {% for execution_node in groups['execution'] %}
-{{ execution_node }}
+{{ execution_node }} node_type={{ execution_plane_node_type | default('execution') }}
 {% endfor %}
 
 [execution_nodes:vars]
