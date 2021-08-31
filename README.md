@@ -179,9 +179,38 @@ Destroy IBM Cloud Instances If Tower is Deployed with Isolated Nodes
 
 Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
 
-        ansible-playbook cleanup.yml -e ibmcloud_vsi_count=2 \
-                                     -e ibmcloud_vpc_name_prefix='perf-scale-test' \
-                                     -e install_iso=True
+    ansible-playbook cleanup.yml -e ibmcloud_vsi_count=2 \
+                                 -e ibmcloud_vpc_name_prefix='perf-scale-test' \
+                                 -e install_iso=True
+
+Looking for Tower/Controller 4.z deployment with/without Execution Nodes
+------------------------------------------------------------------------
+    ansible-playbook create.yml -e ibmcloud_vsi_count=2 \
+                                -e ibmcloud_vpc_name_prefix='perf-scale-test' \
+                                -e install_execution_node=True
+
+    Defaults:
+    1. All targets in the [automationcontroller] have node_type=hybrid
+    2. All targets in the [execution_nodes] have node_type=execution
+
+    If you plan to specify different node_type to different targets in the inventory then please specify how many how many tower/controller nodes would you like to have node_type as control and how many as hybrid. How many of execution nodes would you like to have node_type as execution and how many as hop
+
+    -e tower_control_nodes=1 \
+    -e tower_hyrid_nodes=2 \       # Sum of tower_control_nodes + tower_hyrid_nodes should always be equal to ibmcloud_vsi_count
+    -e tower_execution_nodes=2 \
+    -e tower_hop_nodes=1           # Sum of tower_execution_nodes + tower_hop_nodes should always be equal to ibmcloud_vsi_execution_instance_count
+
+    If fails to meet the above requirements then the inventory sections will be created with default node_type
+
+Destroy IBM Cloud Instances If Tower/Controller 4.z deployed with/without Execution Nodes
+-----------------------------------------------------------------------------------------
+
+Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
+
+    ansible-playbook cleanup.yml -e ibmcloud_vsi_count=2 \
+                                 -e ibmcloud_vpc_name_prefix='perf-scale-test' \
+                                 -e install_execution_node=True
+
 
 To Take Control Over the Default Configuration Values
 ------------------------------------------------------
