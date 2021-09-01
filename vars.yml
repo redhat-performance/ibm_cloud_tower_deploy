@@ -37,6 +37,20 @@ ibmcloud_vsi_execution_profile: 'bx2-4x16'
 ibmcloud_vsi_execution_instance_count: 1
 install_execution_node: False
 
+#_NODE_VALID_TYPES = {
+#    _CONTROL_PLANE: {
+#        "types": frozenset(("control", "hybrid")),
+#        "default_type": "hybrid",
+#    },
+#    _EXECUTION_PLANE: {
+#        "types": frozenset(("execution", "hop")),
+#        "default_type": "execution",
+
+#receptor_workable_types:
+#  - control
+#  - execution
+#  - hybrid
+
 # Required ports for SSH, Tower, Exporters
 list_of_ports: [22, 80, 443, 5432, 9121, 9256, 9117, 9393, 9392, 9187, 9100, 2222]
 #ssh_public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2xCcL+l/hHGI0s8qfx3sm9JV4tnTSmYzimr7t4KmYEi+RUODyKtvU+LkyedYGhdWXIMgx5yajafAoz8oacMX+SctNa9RAXz31pBC53rztKYnlvly806BXg6s0fTei1gtVt5SGhApviWGVjyQ89CkON1rM41mBqiS9015ND3D2kYBVu3g1+0t/6Tp4bSZpIdFAAf95jDtkqTMo04+c73JqQA/pyXguU7NpAmIC7YMyRXwow8Q0UTiBkcgk7Z9/HCxXz7elfx48nTko3HHgwTublODLdnOiG1BgWESLtLP5H+NvU22bUJ32nnN1WQ9RhrMHxcb8H4TsKLM257fT0I5O8an8TQ/ulhX3+pO1SFpdv6NVAgmhokIjP08VHPYknn8V5GO0q5wx11/8Gk4eT8LKrjhLJThongXxbAWKBz9pVpsnumvQH8F1i9MduJxbq980ZjRAjyNvz2RuN5RFWixCTPidpqtNi1p6uoBSyNvTZ5TzpnJhwtdxAKpL9qX6PZ8= root@localhost-localdomain'
