@@ -52,7 +52,7 @@ install_execution_node: False
 #  - hybrid
 
 # Required ports for SSH, Tower, Exporters
-list_of_ports: [22, 80, 443, 5432, 9121, 9256, 9117, 9393, 9392, 9187, 9100, 2222]
+list_of_ports: [22, 80, 443, 5432, 9121, 9256, 9117, 9393, 9392, 9187, 9100, 27199]
 #ssh_public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2xCcL+l/hHGI0s8qfx3sm9JV4tnTSmYzimr7t4KmYEi+RUODyKtvU+LkyedYGhdWXIMgx5yajafAoz8oacMX+SctNa9RAXz31pBC53rztKYnlvly806BXg6s0fTei1gtVt5SGhApviWGVjyQ89CkON1rM41mBqiS9015ND3D2kYBVu3g1+0t/6Tp4bSZpIdFAAf95jDtkqTMo04+c73JqQA/pyXguU7NpAmIC7YMyRXwow8Q0UTiBkcgk7Z9/HCxXz7elfx48nTko3HHgwTublODLdnOiG1BgWESLtLP5H+NvU22bUJ32nnN1WQ9RhrMHxcb8H4TsKLM257fT0I5O8an8TQ/ulhX3+pO1SFpdv6NVAgmhokIjP08VHPYknn8V5GO0q5wx11/8Gk4eT8LKrjhLJThongXxbAWKBz9pVpsnumvQH8F1i9MduJxbq980ZjRAjyNvz2RuN5RFWixCTPidpqtNi1p6uoBSyNvTZ5TzpnJhwtdxAKpL9qX6PZ8= root@localhost-localdomain'
 
 ssh_public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDlkniCZbiIhOv9RkoSE73Yg4sjRtuiuXWKHBCvhQ9BxZV33rMEGCUwYs2XT8QWbuJxBg+aXspZ1Of00lNV1S2/Ukg4n6Os7szI6mqJQgFR/oqLckGbHML76CdvwQ1iVoSFdE5bieQdfbK+LmIRVQAzO93090jWtWaJ8MkxzgarvXpPcwidVjB/PDsIq3NG/6boH/xUhxRH/Qt+4ShVH0/w4YTLGAvp56yeN+1XWoGy/D0V7JQX9y82ca3n9S+DsYAJBcUp/k7rjqtEsNBDYpNk7nvjmt9jiXCVCBu6EajcINOa/uEsWsyX/iyxE6XENsBP+hPK7/HMEqvMJw2cfJakCHCLTRpYZSOS4fursT53ZXt+UWko8S2xIqt/kkH4HSvrfHejlUWGILlRhEKX6SfMQaLLWaqz8QT9LIhEY/gRjk4wekAYWSQziaMeEcUsLVITihLKKG8qw6+ig5TOlw6LAhBJxCsKPkWLul7wAP5j6mI9/M73nX8JXX3O/drcNR0= pok@localhost.localdomain'
