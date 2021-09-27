@@ -10,6 +10,13 @@
 {% endfor %}
 {% endif %}
 
+{% if groups['execution']|default([])|length > 0 %}
+[execution_servers]
+{% for execution_node in groups['execution'] %}
+{{ execution_node }} ansible_ssh_private_key_file=conf/towerperf_id_rsa
+{% endfor %}
+{% endif %}
+
 [database]
 {% for host in groups['database'] %}
 {{ host }} ansible_ssh_private_key_file=conf/towerperf_id_rsa
