@@ -3,7 +3,7 @@ admin_password: 'password'
 pg_password: 'password'
 pg_database: 'awx'
 pg_username: 'awx'
-{% if 'devel' in installation_tarball %}
+{% if 'nightlies' in installation_tarball %}
 global_job_execution_environments:
   - name: Controller Default EE
     image: {{ global_ee }}
