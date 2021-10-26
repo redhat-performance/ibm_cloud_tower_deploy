@@ -43,7 +43,7 @@ pg_host="{{ host }}"
 pg_port="{{ pg_port | default('5432') }}"
 {% endfor %}{# for host in groups['database'] #}
 # registry variables
-{% if 'devel' in installation_tarball %}
+{% if 'nightlies' in installation_tarball %}
   registry_username="{{ brew_registry_username }}"
   registry_url="{{ brew_registry_url }}"
   registry_password="{{ brew_registry_password }}"
