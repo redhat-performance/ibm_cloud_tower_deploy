@@ -29,7 +29,7 @@
      target: "{{ vsi.primary_network_interface[0]['id'] }}"
   register: fip_create_output
 
-- name: Save Floating IPs 
+- name: Save Floating IPs
   set_fact:
      cacheable: True
      ibmcloud_vsi_node: "{{ ibmcloud_vsi_node|default([]) + [fip_create_output.resource.address] }}"

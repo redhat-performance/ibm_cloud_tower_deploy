@@ -79,7 +79,7 @@
 
     - name: Print IBM Cloud Instance Floating IPs
       debug:
-        msg: 
+        msg:
           - "IC instance Floating IP: "
           - "{{ ibmcloud_vsi_node }}"
 
@@ -143,12 +143,12 @@
 
     - name: Add VM's to Isolated group
       include_role:
-        name: add_iso_hosts 
+        name: add_iso_hosts
       when: install_tower | default('True') | bool
 
     - name: Print IBM Cloud Instance Floating IPs
       debug:
-        msg: 
+        msg:
           - "IC instance Floating IP: "
           - "Isolated Nodes: {{ iso_node }}"
 
@@ -239,7 +239,7 @@
     - name: Fetch the tower vars file
       include_vars:
         file: tower_vars.yml
-        
+
     - name: Fetch the vaulted variables
       include_vars:
         file: config/credential.vault
