@@ -8,29 +8,51 @@ inventory_template: inventory_cluster_4.j2
 ibmcloud_vpc_name_prefix: 'ansible-tower-test'
 ibmcloud_vpc_region: 'jp-tok'    # Tokyo
 ibmcloud_vpc_image_name: 'ibm-redhat-8-3-minimal-amd64-3'
-ibmcloud_vsi_image_id: 'r022-939bbfe2-d823-4c01-98a3-a6f8193731d8'
 ibmcloud_vsi_profile: 'bx2-4x16'
-ibmcloud_vsi_count: 2 
+ibmcloud_vsi_count: 2
 install_tower: True
+# Find the right RHEL 8.3 image for the region
+# Recorded from for region in $IC_REGIONS; do ibmcloud target -r $region && ibmcloud is image ibm-redhat-8-3-minimal-amd64-3;
+ibmcloud_image: "rhel_8.3"
+ibmcloud_image_ids:
+  "au-syd":
+    "rhel_8.3": "r026-587ff0d6-6549-44f6-a6ed-f1e11174fb43"
+  "jp-osa":
+    "rhel_8.3": "r034-260cc2b2-d96c-4fa1-83d5-ef7524d6c909"
+  "jp-tok":
+    "rhel_8.3": "r022-939bbfe2-d823-4c01-98a3-a6f8193731d8"
+  "eu-de":
+    "rhel_8.3": "r010-5ea36559-4a3a-40e4-9222-b1d0a430951e"
+  "eu-gb":
+    "rhel_8.3": "r018-179f9b5c-0e4d-4614-8fbb-07e8ec55a493"
+  "ca-tor":
+    "rhel_8.3": "r038-ce441bef-75f6-4bca-a1b4-96ce0e9ca1e6"
+  "us-south":
+    "rhel_8.3": "r006-c803a85a-e3cf-4f61-bafa-ae1d9e759d15"
+  "us-east":
+    "rhel_8.3": "r014-02843c52-e12b-4f72-a631-931b4bf6589d"
+  "br-sao":
+    "rhel_8.3": "r042-71b7a0b1-5b3c-4024-b815-2b2d79687792"
+# ibmcloud_vsi_image_id: 'r022-939bbfe2-d823-4c01-98a3-a6f8193731d8'
 
-# Ansible Tower and Tower database must be in the same 
+# Ansible Tower and Tower database must be in the same
 ibmcloud_vsi_db_profile: 'bx2-4x16'
 
 
 # Isolated Nodes must be in the different region compared to Controller
 ibmcloud_vpc_iso_name_prefix: 'ansible-tower-iso-test'
-ibmcloud_vpc_iso_region: 'eu-gb'    # London   
+ibmcloud_vpc_iso_region: 'eu-gb'    # London
 ibmcloud_vsi_iso_image_name: 'ibm-redhat-8-3-minimal-amd64-3'
 ibmcloud_vsi_iso_image_id: 'r018-179f9b5c-0e4d-4614-8fbb-07e8ec55a493'
 ibmcloud_vsi_iso_profile: 'bx2-4x16'
 ibmcloud_vsi_iso_instance_count: 1
-install_iso: False 
+install_iso: False
 
 
-# Execution Node Variables, in Tower 4.1, execution_node is a replacement of isolated nodes 
+# Execution Node Variables, in Tower 4.1, execution_node is a replacement of isolated nodes
 
 ibmcloud_vpc_execution_name_prefix: 'ansible-tower-exec-test'
-ibmcloud_vpc_execution_region: 'eu-gb'    # London   
+ibmcloud_vpc_execution_region: 'eu-gb'    # London
 ibmcloud_vsi_execution_image_name: 'ibm-redhat-8-3-minimal-amd64-3'
 ibmcloud_vsi_execution_image_id: 'r018-179f9b5c-0e4d-4614-8fbb-07e8ec55a493'
 ibmcloud_vsi_execution_profile: 'bx2-4x16'
@@ -53,7 +75,5 @@ install_execution_node: False
 
 # Required ports for SSH, Tower, Exporters
 list_of_ports: [22, 80, 443, 5432, 9121, 9256, 9117, 9393, 9392, 9187, 9100, 27199]
-#ssh_public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2xCcL+l/hHGI0s8qfx3sm9JV4tnTSmYzimr7t4KmYEi+RUODyKtvU+LkyedYGhdWXIMgx5yajafAoz8oacMX+SctNa9RAXz31pBC53rztKYnlvly806BXg6s0fTei1gtVt5SGhApviWGVjyQ89CkON1rM41mBqiS9015ND3D2kYBVu3g1+0t/6Tp4bSZpIdFAAf95jDtkqTMo04+c73JqQA/pyXguU7NpAmIC7YMyRXwow8Q0UTiBkcgk7Z9/HCxXz7elfx48nTko3HHgwTublODLdnOiG1BgWESLtLP5H+NvU22bUJ32nnN1WQ9RhrMHxcb8H4TsKLM257fT0I5O8an8TQ/ulhX3+pO1SFpdv6NVAgmhokIjP08VHPYknn8V5GO0q5wx11/8Gk4eT8LKrjhLJThongXxbAWKBz9pVpsnumvQH8F1i9MduJxbq980ZjRAjyNvz2RuN5RFWixCTPidpqtNi1p6uoBSyNvTZ5TzpnJhwtdxAKpL9qX6PZ8= root@localhost-localdomain'
-
 ssh_public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDlkniCZbiIhOv9RkoSE73Yg4sjRtuiuXWKHBCvhQ9BxZV33rMEGCUwYs2XT8QWbuJxBg+aXspZ1Of00lNV1S2/Ukg4n6Os7szI6mqJQgFR/oqLckGbHML76CdvwQ1iVoSFdE5bieQdfbK+LmIRVQAzO93090jWtWaJ8MkxzgarvXpPcwidVjB/PDsIq3NG/6boH/xUhxRH/Qt+4ShVH0/w4YTLGAvp56yeN+1XWoGy/D0V7JQX9y82ca3n9S+DsYAJBcUp/k7rjqtEsNBDYpNk7nvjmt9jiXCVCBu6EajcINOa/uEsWsyX/iyxE6XENsBP+hPK7/HMEqvMJw2cfJakCHCLTRpYZSOS4fursT53ZXt+UWko8S2xIqt/kkH4HSvrfHejlUWGILlRhEKX6SfMQaLLWaqz8QT9LIhEY/gRjk4wekAYWSQziaMeEcUsLVITihLKKG8qw6+ig5TOlw6LAhBJxCsKPkWLul7wAP5j6mI9/M73nX8JXX3O/drcNR0= pok@localhost.localdomain'
-
+ibmcloud_ssh_key: perfscale-automation-controller-control-ssh-key

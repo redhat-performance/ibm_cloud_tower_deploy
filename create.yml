@@ -40,7 +40,7 @@
         name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
         vsi_profile: "{{ ibmcloud_vsi_profile }}"
-        image_id: "{{ ibmcloud_vsi_image_id }}"
+        image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_region][ibmcloud_image] }}"
         ic_instance: "{{ ibmcloud_vsi_count }}"
 
     - name: Install the VM's for Database
@@ -50,7 +50,7 @@
         name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
         vsi_profile: "{{ ibmcloud_vsi_db_profile }}"
-        image_id: "{{ ibmcloud_vsi_image_id }}"
+        image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_region][ibmcloud_image] }}"
         ic_instance: "{{ ibmcloud_vsi_count }}"
       when: install_tower | bool
 
@@ -126,7 +126,7 @@
         name_prefix: "{{ ibmcloud_vpc_iso_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_iso_region }}"
         vsi_profile: "{{ ibmcloud_vsi_iso_profile }}"
-        image_id: "{{ ibmcloud_vsi_iso_image_id }}"
+        image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_region][ibmcloud_image] }}"
         ic_instance: "{{ ibmcloud_vsi_iso_instance_count }}"
 
     - name: Save Floating IP's of Isolated Nodes
@@ -195,7 +195,7 @@
         name_prefix: "{{ ibmcloud_vpc_execution_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_execution_region }}"
         vsi_profile: "{{ ibmcloud_vsi_execution_profile }}"
-        image_id: "{{ ibmcloud_vsi_execution_image_id }}"
+        image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_region][ibmcloud_image] }}"
         ic_instance: "{{ ibmcloud_vsi_execution_instance_count }}"
 
     - name: Save Floating IP's of Execution Nodes
