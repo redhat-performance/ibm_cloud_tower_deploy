@@ -228,7 +228,15 @@
     - name: Wait for VSI to become reachable over SSH
       wait_for_connection:
 
-- name: Check Ansible connection to new DEMO VSI
+- name: Add team ssh keys
+  hosts: tower database
+  gather_facts: True
+  tasks:
+    - name: Add towerperf team member keys
+      include_role:
+        name: auth_keys
+
+- name: Install Tower
   hosts: tower[0]
   gather_facts: False
   tasks:
@@ -248,6 +256,6 @@
       include_role:
         name: copy_key
 
-    - name: Copy the towerperf ssh private key
+    - name: Install Tower
       include_role:
         name: install_tower

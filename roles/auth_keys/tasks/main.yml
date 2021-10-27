@@ -1,0 +1,13 @@
+---
+# Borrowed from https://github.com/ansible/aap-qa/tree/devel/playbooks/roles/auth_keys
+# Would be cool to create a shared collection with some roles we could share with QE
+- name: gather keys
+  loop: "{{ authorized_keys }}"
+  include_tasks:
+    file: gather_key.yml
+
+- name: append keys to ssh_keys file
+  blockinfile:
+    path: '/root/.ssh/authorized_keys'
+    block: "{{ ssh_keys }}"
+  when: ssh_keys is defined
