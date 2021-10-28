@@ -7,33 +7,42 @@ inventory_template: inventory_cluster_4.j2
 # Tower and the Database must be in the same Region and in the same VPC
 ibmcloud_vpc_name_prefix: 'ansible-tower-test'
 ibmcloud_vpc_region: 'jp-tok'    # Tokyo
-ibmcloud_vpc_image_name: 'ibm-redhat-8-3-minimal-amd64-3'
+ibmcloud_image: "rhel_8.3"
+ibmcloud_image_ids:
+  "au-syd":
+    "rhel_8.3": "r026-587ff0d6-6549-44f6-a6ed-f1e11174fb43"
+    "rhel_8.4": "r026-ad73645c-afe8-4b93-b4fe-dbfd1880bebd"
+  "jp-osa":
+    "rhel_8.3": "r034-260cc2b2-d96c-4fa1-83d5-ef7524d6c909"
+    "rhel_8.4": "r034-ee558f96-4494-461c-aec6-20d2efc7df05"
+  "jp-tok":
+    "rhel_8.3": "r022-939bbfe2-d823-4c01-98a3-a6f8193731d8"
+    "rhel_8.4": "r022-25bf2491-2911-4860-9573-bf487884f3c1"
+  "eu-de":
+    "rhel_8.3": "r010-5ea36559-4a3a-40e4-9222-b1d0a430951e"
+    "rhel_8.4": "r010-a704b088-c2ee-4f92-b384-1a0ac30f2f19"
+  "eu-gb":
+    "rhel_8.3": "r018-179f9b5c-0e4d-4614-8fbb-07e8ec55a493"
+    "rhel_8.4": "r018-fc0d7bfc-8fc1-4184-a9b8-5e8bcdd61c0e"
+  "ca-tor":
+    "rhel_8.3": "r038-ce441bef-75f6-4bca-a1b4-96ce0e9ca1e6"
+    "rhel_8.4": "r038-358762fc-47c7-43f4-b2b6-2cc17e5c1f60"
+  "us-south":
+    "rhel_8.3": "r006-c803a85a-e3cf-4f61-bafa-ae1d9e759d15"
+    "rhel_8.4": "r006-bf22526d-a650-49bb-bc6e-3275694d2b27"
+  "us-east":
+    "rhel_8.3": "r014-02843c52-e12b-4f72-a631-931b4bf6589d"
+    "rhel_8.4": "r014-0b1d622e-19f8-4e20-aa2d-ef4256c9ee72"
+  "br-sao":
+    "rhel_8.3": "r042-71b7a0b1-5b3c-4024-b815-2b2d79687792"
+    "rhel_8.4": "r042-06ad9b4d-02a7-44bb-989e-18f1882646ac"
+
 ibmcloud_vsi_profile: 'bx2-4x16'
 ibmcloud_vsi_count: 2
 install_tower: True
 # Find the right RHEL 8.3 image for the region
 # Recorded from for region in $IC_REGIONS; do ibmcloud target -r $region && ibmcloud is image ibm-redhat-8-3-minimal-amd64-3;
-ibmcloud_image: "rhel_8.3"
-ibmcloud_image_ids:
-  "au-syd":
-    "rhel_8.3": "r026-587ff0d6-6549-44f6-a6ed-f1e11174fb43"
-  "jp-osa":
-    "rhel_8.3": "r034-260cc2b2-d96c-4fa1-83d5-ef7524d6c909"
-  "jp-tok":
-    "rhel_8.3": "r022-939bbfe2-d823-4c01-98a3-a6f8193731d8"
-  "eu-de":
-    "rhel_8.3": "r010-5ea36559-4a3a-40e4-9222-b1d0a430951e"
-  "eu-gb":
-    "rhel_8.3": "r018-179f9b5c-0e4d-4614-8fbb-07e8ec55a493"
-  "ca-tor":
-    "rhel_8.3": "r038-ce441bef-75f6-4bca-a1b4-96ce0e9ca1e6"
-  "us-south":
-    "rhel_8.3": "r006-c803a85a-e3cf-4f61-bafa-ae1d9e759d15"
-  "us-east":
-    "rhel_8.3": "r014-02843c52-e12b-4f72-a631-931b4bf6589d"
-  "br-sao":
-    "rhel_8.3": "r042-71b7a0b1-5b3c-4024-b815-2b2d79687792"
-# ibmcloud_vsi_image_id: 'r022-939bbfe2-d823-4c01-98a3-a6f8193731d8'
+ibmcloud_vsi_image_id: ibmcloud_image_ids[ibmcloud_vpc_region][ibmcloud_image]
 
 # Ansible Tower and Tower database must be in the same
 ibmcloud_vsi_db_profile: 'bx2-4x16'
@@ -42,8 +51,7 @@ ibmcloud_vsi_db_profile: 'bx2-4x16'
 # Isolated Nodes must be in the different region compared to Controller
 ibmcloud_vpc_iso_name_prefix: 'ansible-tower-iso-test'
 ibmcloud_vpc_iso_region: 'eu-gb'    # London
-ibmcloud_vsi_iso_image_name: 'ibm-redhat-8-3-minimal-amd64-3'
-ibmcloud_vsi_iso_image_id: 'r018-179f9b5c-0e4d-4614-8fbb-07e8ec55a493'
+ibmcloud_vsi_iso_image_id: ibmcloud_image_ids[ibmcloud_vpc_iso_region][ibmcloud_image]
 ibmcloud_vsi_iso_profile: 'bx2-4x16'
 ibmcloud_vsi_iso_instance_count: 1
 install_iso: False
@@ -53,8 +61,7 @@ install_iso: False
 
 ibmcloud_vpc_execution_name_prefix: 'ansible-tower-exec-test'
 ibmcloud_vpc_execution_region: 'eu-gb'    # London
-ibmcloud_vsi_execution_image_name: 'ibm-redhat-8-3-minimal-amd64-3'
-ibmcloud_vsi_execution_image_id: 'r018-179f9b5c-0e4d-4614-8fbb-07e8ec55a493'
+ibmcloud_vsi_execution_image_id: ibmcloud_image_ids[ibmcloud_vsi_execution_region][ibmcloud_image]
 ibmcloud_vsi_execution_profile: 'bx2-4x16'
 ibmcloud_vsi_execution_instance_count: 1
 install_execution_node: False
