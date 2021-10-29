@@ -1,0 +1,22 @@
+---
+# Borrowed from https://github.com/ansible/aap-qa/tree/devel/playbooks/roles/auth_keys
+# Would be cool to create a shared collection with some roles we could share with QE
+- name: "gather key {{ item }}"
+  uri:
+   url: '{{ item }}'
+   timeout: 5
+   return_content: yes
+  register: _current_key
+  until: _current_key is success
+  retries: 10
+  delay: 15
+  delegate_to: localhost
+  run_once: true
+  no_log: true
+
+- name: append key
+  set_fact:
+    ssh_keys: "{{ ssh_keys|default('') + _current_key.content }}"
+  when: _current_key.content != ""
+  run_once: true
+  no_log: true

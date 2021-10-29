@@ -40,7 +40,7 @@
         name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
         vsi_profile: "{{ ibmcloud_vsi_profile }}"
-        image_id: "{{ ibmcloud_vsi_image_id }}"
+        image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_region][ibmcloud_image] }}"
         ic_instance: "{{ ibmcloud_vsi_count }}"
 
     - name: Install the VM's for Database
@@ -50,7 +50,7 @@
         name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
         vsi_profile: "{{ ibmcloud_vsi_db_profile }}"
-        image_id: "{{ ibmcloud_vsi_image_id }}"
+        image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_region][ibmcloud_image] }}"
         ic_instance: "{{ ibmcloud_vsi_count }}"
       when: install_tower | bool
 
@@ -79,7 +79,7 @@
 
     - name: Print IBM Cloud Instance Floating IPs
       debug:
-        msg: 
+        msg:
           - "IC instance Floating IP: "
           - "{{ ibmcloud_vsi_node }}"
 
@@ -126,7 +126,7 @@
         name_prefix: "{{ ibmcloud_vpc_iso_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_iso_region }}"
         vsi_profile: "{{ ibmcloud_vsi_iso_profile }}"
-        image_id: "{{ ibmcloud_vsi_iso_image_id }}"
+        image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_iso_region][ibmcloud_image] }}"
         ic_instance: "{{ ibmcloud_vsi_iso_instance_count }}"
 
     - name: Save Floating IP's of Isolated Nodes
@@ -143,12 +143,12 @@
 
     - name: Add VM's to Isolated group
       include_role:
-        name: add_iso_hosts 
+        name: add_iso_hosts
       when: install_tower | default('True') | bool
 
     - name: Print IBM Cloud Instance Floating IPs
       debug:
-        msg: 
+        msg:
           - "IC instance Floating IP: "
           - "Isolated Nodes: {{ iso_node }}"
 
@@ -195,7 +195,7 @@
         name_prefix: "{{ ibmcloud_vpc_execution_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_execution_region }}"
         vsi_profile: "{{ ibmcloud_vsi_execution_profile }}"
-        image_id: "{{ ibmcloud_vsi_execution_image_id }}"
+        image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_execution_region][ibmcloud_image] }}"
         ic_instance: "{{ ibmcloud_vsi_execution_instance_count }}"
 
     - name: Save Floating IP's of Execution Nodes
@@ -228,7 +228,15 @@
     - name: Wait for VSI to become reachable over SSH
       wait_for_connection:
 
-- name: Check Ansible connection to new DEMO VSI
+- name: Add team ssh keys
+  hosts: tower database
+  gather_facts: True
+  tasks:
+    - name: Add towerperf team member keys
+      include_role:
+        name: auth_keys
+
+- name: Install Tower
   hosts: tower[0]
   gather_facts: False
   tasks:
@@ -239,7 +247,7 @@
     - name: Fetch the tower vars file
       include_vars:
         file: tower_vars.yml
-        
+
     - name: Fetch the vaulted variables
       include_vars:
         file: config/credential.vault
@@ -248,6 +256,6 @@
       include_role:
         name: copy_key
 
-    - name: Copy the towerperf ssh private key
+    - name: Install Tower
       include_role:
         name: install_tower

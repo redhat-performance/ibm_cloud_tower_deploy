@@ -1,5 +1,8 @@
 ---
-- name: "Configure Security Group Rule to open certain ports on the VSI"
+- debug:
+    var: vpc.security_group
+
+- name: "Configure Security Group Rule to open certain ports on the VSI when they don't exist"
   ibm.cloudcollection.ibm_is_security_group_rule:
     state: available
     group: "{{ vpc.default_security_group }}"
@@ -10,6 +13,7 @@
       - port_max: "{{ item }}"
         port_min: "{{ item }}"
   loop: "{{ list_of_ports }}"
+  when: vpc.security_group[0].rules|length < list_of_ports|length
 
 - name: "Configure Security Group Rule to open icmp on the VSI"
   ibm.cloudcollection.ibm_is_security_group_rule:
@@ -20,3 +24,4 @@
     remote: 0.0.0.0/0
     icmp:
       - type: 8
+  when: vpc.security_group[0].rules|length < list_of_ports|length

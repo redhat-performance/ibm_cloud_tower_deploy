@@ -1,13 +1,26 @@
 ---
-- name: Configure SSH Key
-  ibm.cloudcollection.ibm_is_ssh_key:
-    name: "{{ name_prefix }}-ssh-key"
-    public_key: "{{ ssh_public_key }}"
-    #id: "{{ ssh_key.id | default(omit) }}"
+- name: Locate SSH Key if exists
+  ibm.cloudcollection.ibm_is_ssh_key_info:
+    name: "{{ ibmcloud_ssh_key }}"
     region: "{{ ibmcloud_ic_region }}"
-  register: ssh_key_create_output
+  register: ssh_key_info
+  ignore_errors: true
 
 - name: Save SSH Key as fact
   set_fact:
     cacheable: True
+    ssh_key: "{{ ssh_key_info.resource }}"
+
+- name: Configure SSH Key when not present
+  ibm.cloudcollection.ibm_is_ssh_key:
+    name: "{{ ibmcloud_ssh_key }}"
+    public_key: "{{ ssh_public_key }}"
+    region: "{{ ibmcloud_ic_region }}"
+  register: ssh_key_create_output
+  when: ssh_key_info.rc != 0
+
+- name: Save SSH Key as fact when we have created a new one
+  set_fact:
+    cacheable: True
     ssh_key: "{{ ssh_key_create_output.resource }}"
+  when: ssh_key_info.rc != 0

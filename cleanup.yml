@@ -24,13 +24,14 @@
         ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
         ic_instance: "{{ ibmcloud_vsi_count|int }}"
       when: install_tower | bool
-        
+
     - name: Delete SSH Key
       include_role:
         name: delete_ssh
       vars:
         name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
+      when: cleanup_ssh |default(false)| bool
 
     - name: Delete VPC Subnet
       include_role:
