@@ -11,6 +11,60 @@
     - name: Fetch the variables from var file
       include_vars:
         file: vars.yml
+      tags: debug
+
+    - name: Fail if missing EE
+      fail:
+        msg: You are running on a nightly build, you need to set the global_ee and control_plane_ee
+      when: "'nightlies' in installation_tarball and (global_ee is not defined or control_plane_ee is not defined)"
+
+    - name: Print some debug information
+      vars:
+        msg: |
+          Requested Topology:
+          --------------------------------
+          Scenario: {{ scenario|default("None selected") }}
+          Inventory Template: {{ inventory_template|default("None set") }}
+
+          Plain IBM Hosts
+          --------------------------------
+          Plain Hosts: {{ ibmcloud_vsi_count|default("None set") if not install_tower|default(false)|bool else 0 }}
+          Image ID: {{ ibmcloud_vsi_image_id|default("None set") }}
+          Image profile: {{ ibmcloud_vsi_profile|default("None set") }}
+          Region: {{ ibmcloud_vpc_region|default("None set") }}
+
+          Control Plane:
+          --------------------------------
+          Control Nodes: {{ tower_control_nodes|default("None set") if install_tower|default(false)|bool else 0}}
+          Hybrid Nodes: {{ tower_hybrid_nodes|default("None set") if install_tower|default(false)|bool else 0 }}
+          Total Control Plane Nodes to deploy: {{ ibmcloud_vsi_count|default("None set") if install_tower|default(false)|bool else 0 }}
+          Image ID: {{ ibmcloud_vsi_image_id|default("None set") }}
+          Image profile: {{ ibmcloud_vsi_profile|default("None set") }}
+          Region: {{ ibmcloud_vpc_region|default("None set") }}
+
+          Execution Plane:
+          --------------------------------
+          Hop Nodes: {{ tower_hop_nodes|default("None set") }}
+          Execution Nodes: {{ tower_execution_nodes|default("None set") }}
+          Total nodes to deploy for execution plane: {{ ibmcloud_vsi_execution_instance_count|default("None set") }}
+          Enable execution nodes: {{ install_execution_node|default("None set") }}
+          Image ID: {{ ibmcloud_vsi_execution_image_id|default("None set") }}
+          Image profile: {{ ibmcloud_vsi_execution_profile|default("None set") }}
+          Region: {{ ibmcloud_vpc_execution_region|default("None set") }}
+
+          Isolated Nodes:
+          --------------------------------
+          Legacy Isolated Nodes requested: {{ tower_isolated_nodes|default("None set") }}
+          Legacy Isolated Nodes to deploy: {{ ibmcloud_vsi_iso_instance_count|default("None set") }}
+          Enable legacy isolated nodes: {{ install_iso|default("None set") }}
+          Image ID: {{ ibmcloud_vsi_iso_image_id|default("None set") }}
+          Image profile: {{ ibmcloud_vsi_iso_profile|default("None set") }}
+          Region: {{ ibmcloud_vpc_iso_region|default("None set") }}
+
+      debug:
+        msg: "{{ msg.split('\n') }}"
+      tags: debug
+      ignore_errors: True
 
     - name: Configure VPC
       include_role:
@@ -198,9 +252,13 @@
         image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_execution_region][ibmcloud_image] }}"
         ic_instance: "{{ ibmcloud_vsi_execution_instance_count }}"
 
+    - name: Calculate execution node start index in list of IPs
+      set_fact:
+        execution_node_start_indx: "{{ (ibmcloud_vsi_node|length - ibmcloud_vsi_execution_instance_count|int) | int }}"
+
     - name: Save Floating IP's of Execution Nodes
       set_fact:
-        execution_node: "{{ ibmcloud_vsi_node[ibmcloud_vsi_count|int + 1::] }}"
+        execution_node: "{{ ibmcloud_vsi_node[(execution_node_start_indx|int)::] }}"
         cacheable: True
 
     - name: Configure Security Group Rule

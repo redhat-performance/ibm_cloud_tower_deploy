@@ -2,7 +2,74 @@
 # Ansible Tower Installation
 #installation_tarball: https://releases.ansible.com/ansible-tower/setup-bundle/ansible-tower-setup-bundle-latest.tar.gz
 installation_tarball: http://perf54.perf.lab.eng.bos.redhat.com/pub/ansible-automation-platform-setup-bundle-2.0.0-1-early-access.tar.gz
-inventory_template: inventory_cluster_4.j2
+
+scenario: "plain-nodes"
+
+scenario_map:
+  "plain-nodes":
+    plain_nodes: 2
+    install_tower: False
+  "custom":
+    # leave everything as 0/False/defaults, user must provide all overrides
+  "control-cluster":
+    control_nodes: 3
+    execution_nodes: 3
+    inventory_template: "inventory_cluster_4.1.j2"
+    install_tower: True
+  "hybrid-cluster":
+    hybrid_nodes: 3
+    execution_nodes: 3
+    inventory_template: "inventory_cluster_4.1.j2"
+  "control-cluster-1-hop-to-execution-plane":
+    control_nodes: 3
+    execution_nodes: 2
+    hop_nodes: 1
+    inventory_template: "inventory_cluster_4.1.j2"
+    install_tower: True
+  "control-cluster-2-hop-to-execution-plane":
+    control_nodes: 3
+    execution_nodes: 2
+    hop_nodes: 2
+    inventory_template: "inventory_cluster_4.1.j2"
+    install_tower: True
+  "control-cluster-3-hop-to-execution-plane":
+    control_nodes: 3
+    execution_nodes: 2
+    hop_nodes: 3
+    inventory_template: "inventory_cluster_4.1.j2"
+    install_tower: True
+  "hybrid-cluster-hop-to-execution-plane":
+    hybrid_nodes: 3
+    execution_nodes: 2
+    hop_nodes: 1
+    inventory_template: "inventory_cluster_4.1.j2"
+    install_tower: True
+  "single-hybrid":
+    hybrid_nodes: 1
+    inventory_template: "inventory_cluster_4.1.j2"
+    install_tower: True
+  "legacy-38-cluster-with-isolated-nodes":
+    hybrid_nodes: 3
+    legacy_isolated_nodes: 2
+    inventory_template: "inventory_cluster.j2"
+    install_tower: True
+  "legacy-38-cluster":
+    hybrid_nodes: 3
+    inventory_template: "inventory_cluster.j2"
+    install_tower: True
+  "legacy-40-cluster":
+    hybrid_nodes: 3
+    inventory_template: "inventory_cluster_4.j2"
+    install_tower: True
+
+plain_nodes: '{{ scenario_map[scenario]["plain_nodes"]|default(0)|int }}'
+tower_control_nodes: '{{ scenario_map[scenario]["control_nodes"]|default(0)|int }}'
+tower_hybrid_nodes: '{{ scenario_map[scenario]["hybrid_nodes"]|default(0)|int }}'
+tower_execution_nodes: '{{ scenario_map[scenario]["execution_nodes"]|default(0)|int }}'
+tower_isolated_nodes: '{{ scenario_map[scenario]["legacy_isolated_nodes"]|default(0)|int }}'
+tower_hop_nodes: '{{ scenario_map[scenario]["hop_nodes"]|default(0)|int }}'
+inventory_template: '{{ scenario_map[scenario]["inventory_template"]|default("") }}'
+install_tower: '{{ scenario_map[scenario]["install_tower"]|default(False)|bool }}'
 
 # Tower and the Database must be in the same Region and in the same VPC
 ibmcloud_vpc_name_prefix: 'ansible-tower-test'
@@ -38,11 +105,10 @@ ibmcloud_image_ids:
     "rhel_8.4": "r042-06ad9b4d-02a7-44bb-989e-18f1882646ac"
 
 ibmcloud_vsi_profile: 'bx2-4x16'
-ibmcloud_vsi_count: 2
-install_tower: True
+ibmcloud_vsi_count: '{{ tower_control_nodes|int + tower_hybrid_nodes|int + plain_nodes|int |int}}'
 # Find the right RHEL 8.3 image for the region
 # Recorded from for region in $IC_REGIONS; do ibmcloud target -r $region && ibmcloud is image ibm-redhat-8-3-minimal-amd64-3;
-ibmcloud_vsi_image_id: ibmcloud_image_ids[ibmcloud_vpc_region][ibmcloud_image]
+ibmcloud_vsi_image_id: '{{ ibmcloud_image_ids[ibmcloud_vpc_region][ibmcloud_image] }}'
 
 # Ansible Tower and Tower database must be in the same
 ibmcloud_vsi_db_profile: 'bx2-4x16'
@@ -51,20 +117,20 @@ ibmcloud_vsi_db_profile: 'bx2-4x16'
 # Isolated Nodes must be in the different region compared to Controller
 ibmcloud_vpc_iso_name_prefix: 'ansible-tower-iso-test'
 ibmcloud_vpc_iso_region: 'eu-gb'    # London
-ibmcloud_vsi_iso_image_id: ibmcloud_image_ids[ibmcloud_vpc_iso_region][ibmcloud_image]
+ibmcloud_vsi_iso_image_id: '{{ ibmcloud_image_ids[ibmcloud_vpc_iso_region][ibmcloud_image] }}'
 ibmcloud_vsi_iso_profile: 'bx2-4x16'
-ibmcloud_vsi_iso_instance_count: 1
-install_iso: False
+ibmcloud_vsi_iso_instance_count: '{{ tower_isolated_nodes|int }}'
+install_iso: '{{ tower_isolated_nodes|int > 0 |bool}}'
 
 
 # Execution Node Variables, in Tower 4.1, execution_node is a replacement of isolated nodes
 
 ibmcloud_vpc_execution_name_prefix: 'ansible-tower-exec-test'
 ibmcloud_vpc_execution_region: 'eu-gb'    # London
-ibmcloud_vsi_execution_image_id: ibmcloud_image_ids[ibmcloud_vsi_execution_region][ibmcloud_image]
+ibmcloud_vsi_execution_image_id: '{{ ibmcloud_image_ids[ibmcloud_vpc_execution_region][ibmcloud_image] }}'
 ibmcloud_vsi_execution_profile: 'bx2-4x16'
-ibmcloud_vsi_execution_instance_count: 1
-install_execution_node: False
+ibmcloud_vsi_execution_instance_count: '{{ tower_execution_nodes|int + tower_hop_nodes|int |int}}'
+install_execution_node: '{{ (tower_execution_nodes|int + tower_hop_nodes|int) > 0 |bool }}'
 
 #_NODE_VALID_TYPES = {
 #    _CONTROL_PLANE: {
