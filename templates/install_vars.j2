@@ -3,7 +3,9 @@ admin_password: 'password'
 pg_password: 'password'
 pg_database: 'awx'
 pg_username: 'awx'
-receptor_log_level: {{ receptor_log_level|default("debug") }}
+{% if receptor_log_level is defined %}
+receptor_log_level:  {{ receptor_log_level }}
+{% endif %}
 {% if 'nightlies' in installation_tarball %}
 global_job_execution_environments:
   - name: Controller Default EE
