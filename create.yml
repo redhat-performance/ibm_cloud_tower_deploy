@@ -13,10 +13,41 @@
         file: vars.yml
       tags: debug
 
+    - name: Set install_tower if only scenario was passed
+      set_fact:
+        install_tower: true
+      when: scenario is defined and scenario not in ["plain-nodes", "custom"]
+
+    - name: Fetch the tower variables from var file
+      include_vars:
+        file: install_tower_vars.yml
+      when: install_tower|default(false)
+      tags: debug
+
     - name: Fail if missing EE
       fail:
         msg: You are running on a nightly build, you need to set the global_ee and control_plane_ee
-      when: "'nightlies' in installation_tarball and (global_ee is not defined or control_plane_ee is not defined)"
+      when: "install_tower|default(false)|bool and 'nightlies' in installation_tarball and (global_ee is not defined or control_plane_ee is not defined)"
+
+    - name: Print some debug information
+      vars:
+        msg: |
+          Requested Topology:
+          --------------------------------
+          Scenario: {{ scenario|default("None selected") }}
+
+          Plain IBM Hosts
+          --------------------------------
+          Plain Hosts: {{ ibmcloud_vsi_count|default("None set") if not install_tower|default(false)|bool else 0 }}
+          Image ID: {{ ibmcloud_vsi_image_id|default("None set") }}
+          Image profile: {{ ibmcloud_vsi_profile|default("None set") }}
+          Region: {{ ibmcloud_vpc_region|default("None set") }}
+
+      debug:
+        msg: "{{ msg.split('\n') }}"
+      when: not (install_tower|default(false)|bool)
+      tags: debug
+      ignore_errors: True
 
     - name: Print some debug information
       vars:
@@ -25,6 +56,7 @@
           --------------------------------
           Scenario: {{ scenario|default("None selected") }}
           Inventory Template: {{ inventory_template|default("None set") }}
+          Installation tarball: {{ installation_tarball }}
 
           Plain IBM Hosts
           --------------------------------
@@ -63,6 +95,7 @@
 
       debug:
         msg: "{{ msg.split('\n') }}"
+      when: install_tower|default(false)|bool
       tags: debug
       ignore_errors: True
 
@@ -106,7 +139,7 @@
         vsi_profile: "{{ ibmcloud_vsi_db_profile }}"
         image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_region][ibmcloud_image] }}"
         ic_instance: "{{ ibmcloud_vsi_count }}"
-      when: install_tower | bool
+      when: install_tower|default(false)| bool
 
     - name: Save Floating IP's of Tower of Database
       set_fact:
@@ -117,7 +150,7 @@
       set_fact:
         db_node: "{{ [ ibmcloud_vsi_node[-1] ] }}"
         cacheable: True
-      when: install_tower | bool
+      when: install_tower|default(false)| bool
 
     - name: Configure Security Group Rule
       include_role:
@@ -129,7 +162,7 @@
     - name: Add VM's to Tower and Database group
       include_role:
         name: add_hosts
-      when: install_tower | bool
+      when: install_tower|default(false)| bool
 
     - name: Print IBM Cloud Instance Floating IPs
       debug:
@@ -146,7 +179,7 @@
   - ibm.cloudcollection
   tasks:
   - name: Should I Install Isolated Nodes ??
-    when: install_iso|bool and ibmcloud_vsi_iso_instance_count|int > 0
+    when: install_iso|default(false)|bool and ibmcloud_vsi_iso_instance_count|int > 0
     block:
     - name: Fetch the variables from var file
       include_vars:
@@ -198,7 +231,7 @@
     - name: Add VM's to Isolated group
       include_role:
         name: add_iso_hosts
-      when: install_tower | default('True') | bool
+      when: install_tower | default(true) | bool
 
     - name: Print IBM Cloud Instance Floating IPs
       debug:
@@ -215,7 +248,7 @@
   - ibm.cloudcollection
   tasks:
   - name: Should I Install Execution Nodes ??
-    when: install_execution_node|bool and ibmcloud_vsi_execution_instance_count|int > 0
+    when: install_execution_node|default(false)|bool and ibmcloud_vsi_execution_instance_count|int > 0
     block:
     - name: Fetch the variables from var file
       include_vars:
@@ -271,7 +304,7 @@
     - name: Add VM's to execution group
       include_role:
         name: add_exec_hosts
-      when: install_tower | default('True') | bool
+      when: install_tower | default(true) | bool
 
     - name: Print IBM Cloud Instance Floating IPs
       debug:
@@ -302,7 +335,11 @@
       include_vars:
         file: vars.yml
 
-    - name: Fetch the tower vars file
+    - name: Fetch the tower variables from var file
+      include_vars:
+        file: install_tower_vars.yml
+
+    - name: Fetch more tower vars
       include_vars:
         file: tower_vars.yml
 
