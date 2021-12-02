@@ -23,7 +23,7 @@
         name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
         ic_instance: "{{ ibmcloud_vsi_count|int }}"
-      when: install_tower | bool
+      when: install_tower|default(false)| bool
 
     - name: Delete SSH Key
       include_role:
@@ -53,7 +53,7 @@
   - ibm.cloudcollection
   tasks:
   - name: Should I Delete Isolated Nodes ??
-    when: install_iso|bool and ibmcloud_vsi_iso_instance_count|int > 0
+    when: install_iso|default(false)|bool and ibmcloud_vsi_iso_instance_count|int > 0
     block:
     - name: Fetch the variables from var file
       include_vars:
@@ -94,7 +94,7 @@
   - ibm.cloudcollection
   tasks:
   - name: Should I Delete Execution Nodes ??
-    when: install_execution_node|bool and ibmcloud_vsi_execution_instance_count|int > 0
+    when: install_execution_node|default(false)|bool and ibmcloud_vsi_execution_instance_count|int > 0
     block:
     - name: Fetch the variables from var file
       include_vars: 

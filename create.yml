@@ -8,9 +8,84 @@
   collections:
   - ibm.cloudcollection
   tasks:
-    - name: Fetch the variables from var file
-      include_vars:
-        file: vars.yml
+    - name: Load appropriate vars
+      include_role:
+        name: load_vars
+
+    - name: Fail if missing EE
+      fail:
+        msg: You are running on a nightly build, you need to set the global_ee and control_plane_ee
+      when: "install_tower|default(false)|bool and 'nightlies' in installation_tarball and (global_ee is not defined or control_plane_ee is not defined)"
+
+    - name: Print some debug information
+      vars:
+        msg: |
+          Requested Topology:
+          --------------------------------
+          Scenario: {{ scenario|default("None selected") }}
+
+          Plain IBM Hosts
+          --------------------------------
+          Plain Hosts: {{ ibmcloud_vsi_count|default("None set") if not install_tower|default(false)|bool else 0 }}
+          Image ID: {{ ibmcloud_vsi_image_id|default("None set") }}
+          Image profile: {{ ibmcloud_vsi_profile|default("None set") }}
+          Region: {{ ibmcloud_vpc_region|default("None set") }}
+
+      debug:
+        msg: "{{ msg.split('\n') }}"
+      when: not (install_tower|default(false)|bool)
+      tags: debug
+      ignore_errors: True
+
+    - name: Print some debug information
+      vars:
+        msg: |
+          Requested Topology:
+          --------------------------------
+          Scenario: {{ scenario|default("None selected") }}
+          Inventory Template: {{ inventory_template|default("None set") }}
+          Installation tarball: {{ installation_tarball }}
+
+          Plain IBM Hosts
+          --------------------------------
+          Plain Hosts: {{ ibmcloud_vsi_count|default("None set") if not install_tower|default(false)|bool else 0 }}
+          Image ID: {{ ibmcloud_vsi_image_id|default("None set") }}
+          Image profile: {{ ibmcloud_vsi_profile|default("None set") }}
+          Region: {{ ibmcloud_vpc_region|default("None set") }}
+
+          Control Plane:
+          --------------------------------
+          Control Nodes: {{ tower_control_nodes|default("None set") if install_tower|default(false)|bool else 0}}
+          Hybrid Nodes: {{ tower_hybrid_nodes|default("None set") if install_tower|default(false)|bool else 0 }}
+          Total Control Plane Nodes to deploy: {{ ibmcloud_vsi_count|default("None set") if install_tower|default(false)|bool else 0 }}
+          Image ID: {{ ibmcloud_vsi_image_id|default("None set") }}
+          Image profile: {{ ibmcloud_vsi_profile|default("None set") }}
+          Region: {{ ibmcloud_vpc_region|default("None set") }}
+
+          Execution Plane:
+          --------------------------------
+          Hop Nodes: {{ tower_hop_nodes|default("None set") }}
+          Execution Nodes: {{ tower_execution_nodes|default("None set") }}
+          Total nodes to deploy for execution plane: {{ ibmcloud_vsi_execution_instance_count|default("None set") }}
+          Enable execution nodes: {{ install_execution_node|default("None set") }}
+          Image ID: {{ ibmcloud_vsi_execution_image_id|default("None set") }}
+          Image profile: {{ ibmcloud_vsi_execution_profile|default("None set") }}
+          Region: {{ ibmcloud_vpc_execution_region|default("None set") }}
+
+          Isolated Nodes:
+          --------------------------------
+          Legacy Isolated Nodes requested: {{ tower_isolated_nodes|default("None set") }}
+          Legacy Isolated Nodes to deploy: {{ ibmcloud_vsi_iso_instance_count|default("None set") }}
+          Enable legacy isolated nodes: {{ install_iso|default("None set") }}
+          Image ID: {{ ibmcloud_vsi_iso_image_id|default("None set") }}
+          Image profile: {{ ibmcloud_vsi_iso_profile|default("None set") }}
+          Region: {{ ibmcloud_vpc_iso_region|default("None set") }}
+
+      debug:
+        msg: "{{ msg.split('\n') }}"
+      when: install_tower|default(false)|bool
+      tags: debug
+      ignore_errors: True
 
     - name: Configure VPC
       include_role:
@@ -52,7 +127,7 @@
         vsi_profile: "{{ ibmcloud_vsi_db_profile }}"
         image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_region][ibmcloud_image] }}"
         ic_instance: "{{ ibmcloud_vsi_count }}"
-      when: install_tower | bool
+      when: install_tower|default(false)| bool
 
     - name: Save Floating IP's of Tower of Database
       set_fact:
@@ -63,7 +138,7 @@
       set_fact:
         db_node: "{{ [ ibmcloud_vsi_node[-1] ] }}"
         cacheable: True
-      when: install_tower | bool
+      when: install_tower|default(false)| bool
 
     - name: Configure Security Group Rule
       include_role:
@@ -75,7 +150,7 @@
     - name: Add VM's to Tower and Database group
       include_role:
         name: add_hosts
-      when: install_tower | bool
+      when: install_tower|default(false)| bool
 
     - name: Print IBM Cloud Instance Floating IPs
       debug:
@@ -92,11 +167,11 @@
   - ibm.cloudcollection
   tasks:
   - name: Should I Install Isolated Nodes ??
-    when: install_iso|bool and ibmcloud_vsi_iso_instance_count|int > 0
+    when: install_iso|default(false)|bool and ibmcloud_vsi_iso_instance_count|int > 0
     block:
-    - name: Fetch the variables from var file
-      include_vars:
-        file: vars.yml
+    - name: Load appropriate vars
+      include_role:
+        name: load_vars
 
     - name: Configure VPC
       include_role:
@@ -144,7 +219,7 @@
     - name: Add VM's to Isolated group
       include_role:
         name: add_iso_hosts
-      when: install_tower | default('True') | bool
+      when: install_tower | default(true) | bool
 
     - name: Print IBM Cloud Instance Floating IPs
       debug:
@@ -161,11 +236,11 @@
   - ibm.cloudcollection
   tasks:
   - name: Should I Install Execution Nodes ??
-    when: install_execution_node|bool and ibmcloud_vsi_execution_instance_count|int > 0
+    when: install_execution_node|default(false)|bool and ibmcloud_vsi_execution_instance_count|int > 0
     block:
-    - name: Fetch the variables from var file
-      include_vars:
-        file: vars.yml
+    - name: Load appropriate vars
+      include_role:
+        name: load_vars
 
     - name: Configure VPC
       include_role:
@@ -198,9 +273,13 @@
         image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_execution_region][ibmcloud_image] }}"
         ic_instance: "{{ ibmcloud_vsi_execution_instance_count }}"
 
+    - name: Calculate execution node start index in list of IPs
+      set_fact:
+        execution_node_start_indx: "{{ (ibmcloud_vsi_node|length - ibmcloud_vsi_execution_instance_count|int) | int }}"
+
     - name: Save Floating IP's of Execution Nodes
       set_fact:
-        execution_node: "{{ ibmcloud_vsi_node[ibmcloud_vsi_count|int + 1::] }}"
+        execution_node: "{{ ibmcloud_vsi_node[(execution_node_start_indx|int)::] }}"
         cacheable: True
 
     - name: Configure Security Group Rule
@@ -213,7 +292,7 @@
     - name: Add VM's to execution group
       include_role:
         name: add_exec_hosts
-      when: install_tower | default('True') | bool
+      when: install_tower | default(true) | bool
 
     - name: Print IBM Cloud Instance Floating IPs
       debug:
@@ -240,13 +319,9 @@
   hosts: tower[0]
   gather_facts: False
   tasks:
-    - name: Fetch the variables from var file
-      include_vars:
-        file: vars.yml
-
-    - name: Fetch the tower vars file
-      include_vars:
-        file: tower_vars.yml
+    - name: Load appropriate vars
+      include_role:
+        name: load_vars
 
     - name: Fetch the vaulted variables
       include_vars:

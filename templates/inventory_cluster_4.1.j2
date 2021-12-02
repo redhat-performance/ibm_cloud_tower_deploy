@@ -1,6 +1,7 @@
 {% macro def_targets(target_group, target_lower_slice, target_upper_slice, target_type) %}
 {% for host in groups[target_group][target_lower_slice:target_upper_slice] %}
-{{ host }} node_type={{ target_type }}
+{{ host }} node_type={{ target_type }}{% if target_type=='hop' and loop.index > 1 %} peers={{ groups[target_group][target_lower_slice + loop.index - 2] }}{% elif target_type=='hop' %} peers=automationcontroller{% endif %}
+
 {% endfor %}
 {% endmacro %}
 [automationcontroller]
@@ -13,7 +14,6 @@
 {% else %}
 {{ def_targets('tower', 0, groups['tower']|length, 'hybrid') }}
 {% endif %}
-
 [database]
 {% for host in groups['database'] %}
 {{ host }}
@@ -24,15 +24,30 @@
 {% set execution_nodes = tower_execution_nodes| default(0)| int %}
 {% set hop_nodes = tower_hop_nodes| default(0)| int %}
 {% set total_execution_plane_nodes = execution_nodes + hop_nodes %}
-{% if execution_nodes >= 1 and groups['execution']|length == total_control_plane_nodes %}
+{% if execution_nodes >= 1 and groups['execution']|length == total_execution_plane_nodes %}
 {{ def_targets('execution', 0, execution_nodes, 'execution') }}
 {{ def_targets('execution', execution_nodes, total_execution_plane_nodes, 'hop') }}
 {% else %}
 {{ def_targets('execution', 0, groups['execution']|length, 'execution') }}
 {% endif %}
 
+{% if tower_hop_nodes|default(0)|int > 0 %}
+[hop_nodes]
+{{ def_targets('execution', execution_nodes, total_execution_plane_nodes, 'hop') }}
+{% endif %}
+
+{% if tower_hop_nodes|default(0)|int > 0 %}
+[normal_execution_nodes]
+{{ def_targets('execution', 0, execution_nodes, 'execution') }}
+{% endif %}
+
+{% if tower_hop_nodes|default(0)|int > 0 %}
+[normal_execution_nodes:vars]
+peers={{ groups['execution'][total_execution_plane_nodes-1] }}
+{% else %}
 [execution_nodes:vars]
 peers=automationcontroller
+{% endif %}
 {% endif %}
 
 
@@ -44,11 +59,11 @@ pg_port="{{ pg_port | default('5432') }}"
 {% endfor %}{# for host in groups['database'] #}
 # registry variables
 {% if 'nightlies' in installation_tarball %}
-  registry_username="{{ brew_registry_username }}"
-  registry_url="{{ brew_registry_url }}"
-  registry_password="{{ brew_registry_password }}"
+registry_username="{{ brew_registry_username }}"
+registry_url="{{ brew_registry_url }}"
+registry_password="{{ brew_registry_password }}"
 {% else %}
-  registry_username="{{ redhat_registry_username }}"
-  registry_url="{{ redhat_registry_url }}"
-  registry_password="{{ redhat_registry_password }}"
+registry_username="{{ redhat_registry_username }}"
+registry_url="{{ redhat_registry_url }}"
+registry_password="{{ redhat_registry_password }}"
 {% endif %}

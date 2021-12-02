@@ -6,6 +6,8 @@ pg_username: 'awx'
 {% if receptor_log_level is defined %}
 receptor_log_level:  {{ receptor_log_level }}
 {% endif %}
+# Set this to a file name. When set to yes or true, it prints it to stdout
+generate_dot_file: mesh.dot
 {% if 'nightlies' in installation_tarball %}
 global_job_execution_environments:
   - name: Controller Default EE

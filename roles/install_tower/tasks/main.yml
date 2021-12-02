@@ -4,13 +4,23 @@
     path: "/root/ansible-tower-setup"
     state: directory
 
+- name: "Create the install vars file"
+  template:
+    src: install_vars.j2
+    dest: /root/ansible-tower-setup/install_vars.yml
+
+- name: create the cluster install inventory
+  template:
+    src: "{{ inventory_template }}"
+    dest: /root/ansible-tower-setup/inventory.cluster
+
 - name: "Download installation tarball"
   get_url:
     url: "{{ installation_tarball }}"
     dest: "/tmp/{{ installation_tarball | basename }}"
     force: no
   delegate_to: localhost
-  
+
 - name: "Copy the installation tarball to Tower node"
   copy:
     src: "/tmp/{{ installation_tarball | basename }}"
@@ -30,16 +40,6 @@
       - "--strip-components=1"
     creates: "/root/ansible-tower-setup/inventory"
 
-- name: "Create the install vars file"
-  template:
-    src: install_vars.j2
-    dest: /root/ansible-tower-setup/install_vars.yml
-
-- name: create the cluster install inventory
-  template:
-    src: "{{ inventory_template }}"
-    dest: /root/ansible-tower-setup/inventory.cluster
-
 - name: "Create ansible configuration file"
   copy:
     dest: "/root/ansible-tower-setup/ansible.cfg"
@@ -47,13 +47,21 @@
         [defaults]
         host_key_checking = False
 
+- name: "Generate graph with setup.sh"
+  command: "./setup.sh -i inventory.cluster -e @install_vars.yml {{ EXTRA_SETUP_PARAMS|default('') }} -- --tag generate_dot_file"
+  args:
+    chdir: "/root/ansible-tower-setup"
+  when: inventory_template == "inventory_cluster_4.1.j2"
+  tags:
+    - debug
+
 - name: "Running setup.sh"
   command: "./setup.sh -i inventory.cluster -e @install_vars.yml {{ EXTRA_SETUP_PARAMS|default('') }}"
   args:
     chdir: "/root/ansible-tower-setup"
     creates: "/usr/bin/ansible-tower-service"
   when: inventory_template == "inventory_cluster.j2"
- 
+
 - name: "Running setup.sh"
   command: "./setup.sh -i inventory.cluster -e @install_vars.yml {{ EXTRA_SETUP_PARAMS|default('') }}"
   args:
@@ -84,4 +92,3 @@
     body_format: json
     validate_certs: false
     force_basic_auth: true
-

@@ -1,0 +1,19 @@
+---
+- name: Fetch the variables from var file
+  include_vars:
+    file: vars.yml
+
+- name: Set install_tower if only scenario was passed
+  set_fact:
+    install_tower: true
+  when: scenario is defined and scenario not in ["plain-nodes", "custom"]
+
+- name: Fetch the tower variables from var file
+  include_vars:
+    file: install_tower_vars.yml
+  when: install_tower|default(false)
+
+- name: Fetch more tower variables from var file
+  include_vars:
+    file: tower_vars.yml
+  when: install_tower|default(false)
