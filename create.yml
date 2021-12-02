@@ -8,21 +8,9 @@
   collections:
   - ibm.cloudcollection
   tasks:
-    - name: Fetch the variables from var file
-      include_vars:
-        file: vars.yml
-      tags: debug
-
-    - name: Set install_tower if only scenario was passed
-      set_fact:
-        install_tower: true
-      when: scenario is defined and scenario not in ["plain-nodes", "custom"]
-
-    - name: Fetch the tower variables from var file
-      include_vars:
-        file: install_tower_vars.yml
-      when: install_tower|default(false)
-      tags: debug
+    - name: Load appropriate vars
+      include_role:
+        name: load_vars
 
     - name: Fail if missing EE
       fail:
@@ -181,9 +169,9 @@
   - name: Should I Install Isolated Nodes ??
     when: install_iso|default(false)|bool and ibmcloud_vsi_iso_instance_count|int > 0
     block:
-    - name: Fetch the variables from var file
-      include_vars:
-        file: vars.yml
+    - name: Load appropriate vars
+      include_role:
+        name: load_vars
 
     - name: Configure VPC
       include_role:
@@ -250,9 +238,9 @@
   - name: Should I Install Execution Nodes ??
     when: install_execution_node|default(false)|bool and ibmcloud_vsi_execution_instance_count|int > 0
     block:
-    - name: Fetch the variables from var file
-      include_vars:
-        file: vars.yml
+    - name: Load appropriate vars
+      include_role:
+        name: load_vars
 
     - name: Configure VPC
       include_role:
@@ -331,17 +319,9 @@
   hosts: tower[0]
   gather_facts: False
   tasks:
-    - name: Fetch the variables from var file
-      include_vars:
-        file: vars.yml
-
-    - name: Fetch the tower variables from var file
-      include_vars:
-        file: install_tower_vars.yml
-
-    - name: Fetch more tower vars
-      include_vars:
-        file: tower_vars.yml
+    - name: Load appropriate vars
+      include_role:
+        name: load_vars
 
     - name: Fetch the vaulted variables
       include_vars:
