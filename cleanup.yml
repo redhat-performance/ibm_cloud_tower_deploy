@@ -52,13 +52,12 @@
   collections:
   - ibm.cloudcollection
   tasks:
+  - name: Load appropriate vars
+    include_role:
+      name: load_vars
   - name: Should I Delete Isolated Nodes ??
     when: install_iso|default(false)|bool and ibmcloud_vsi_iso_instance_count|int > 0
     block:
-    - name: Load appropriate vars
-      include_role:
-        name: load_vars
-
     - name: Delete the VM's
       include_tasks: delete_vsi.yml
       loop: "{{ range(1, ic_instance|int + 1, 1)|list }}"
@@ -93,13 +92,13 @@
   collections:
   - ibm.cloudcollection
   tasks:
+  - name: Load appropriate vars
+    include_role:
+      name: load_vars
+
   - name: Should I Delete Execution Nodes ??
     when: install_execution_node|default(false)|bool and ibmcloud_vsi_execution_instance_count|int > 0
     block:
-    - name: Load appropriate vars
-      include_role:
-        name: load_vars
-
     - name: Delete the VM's
       include_tasks: delete_vsi.yml
       loop: "{{ range(1, ic_instance|int + 1, 1)|list }}"

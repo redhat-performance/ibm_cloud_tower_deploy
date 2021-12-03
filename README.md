@@ -1,13 +1,19 @@
 Create and Destroy IBM Cloud Instances
 =======================================
 
-Tower CPT was broken due to increase in the disk IOPS requirements in Ansible Tower v4.0.0. So it made us to migrate from in-house VMs to IBM cloud VSI.
+This repo includes playbooks to provision and deprovision instances on IBM Cloud.
 
-We believe there are two use cases associated with this repo and these are our primitive attempts to describe it.
-1. Looking for virtual cloud instances (OR)
-2. Looking for Tower deployment on faster disks
+Additionally, it can install component of the Ansible Automation Platform on those instances.
+Currently, that is limited to Automation Controller, but this framework can be extended.
 
-Looking for virtual cloud instances ??
+The original motiviation of this automation was to provision hosts for and install Automation Controller, as increased
+disk IOPs requirements for Automation Controller 4.0+ motivated us to migrate from in-house VMs.
+
+We believe there are two use cases associated with this repo
+1. Looking for plain virtual cloud instances (OR)
+2. Looking for Tower/Automation Platform deployment on faster disks
+
+Looking for plain virtual cloud instances ??
 ------------------------------------
 
 Install Ansible modules collection for IBM cloud
@@ -112,8 +118,7 @@ Launch Plain IBM Cloud Instances
 Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
 
     ansible-playbook create.yml -e ibmcloud_vsi_count=2 \
-                                -e ibmcloud_vpc_name_prefix='perf-scale-test' \
-                                -e install_tower=False
+                                -e ibmcloud_vpc_name_prefix='perf-scale-test'
 ```
 TASK [Print IBM Cloud Instance Floating IPs] ***************************************************************************************************************************************
 ok: [localhost] => {
@@ -145,47 +150,69 @@ Destroy IBM Cloud Instances
 Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
 
     ansible-playbook cleanup.yml -e ibmcloud_vsi_count=2 \
-                                 -e ibmcloud_vpc_name_prefix='perf-scale-test' \
-                                 -e install_tower=False
+                                 -e ibmcloud_vpc_name_prefix='perf-scale-test'
 
+Looking for 3.8.z Tower deployment on faster disks
+---------------------------------------------
 
-Looking for Tower deployment on faster disks
+Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
+
+    ansible-playbook create.yml -e ibmcloud_vpc_name_prefix='perf-scale-test'
+                                -e scenario=legacy-38-cluster-with-isolated-nodes # or legacy-38-cluster if no isolated nodes desired
+
+Looking for 4.0.z Automation Controller deployment on faster disks
 ---------------------------------------------
 
 Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
 
     ansible-playbook create.yml -e ibmcloud_vsi_count=2 \
                                 -e ibmcloud_vpc_name_prefix='perf-scale-test'
+                                -e scenario=legacy-40-cluster
+
+Looking for 4.1+ Automation Controller deployment on faster disks
+---------------------------------------------
+
+Automation Controller 4.1 introduces a number of new node types, being:
+
+hybrid nodes -- have control and execution capabilities
+execution nodes -- have execuiton capabilities
+control nodes -- have only control capabilities
+hop nodes -- serve as a bastion host in the receptor network, have neither control nor execution capabilities
+
+In order to encapsulate the number of different topologies one might want to deploy, named "scenarios" have been
+introduced. Scenarios are described and can be edited/added to in "install_tower_vars.yml".
+
+For example, two simple toplogies are,
+
+    "single-hybrid":
+      hybrid_nodes: 1
+      inventory_template: "inventory_cluster_4.1.j2"
+      install_tower: True
+    "single-control-single-execution":
+      control_nodes: 1
+      execution_nodes: 1
+      inventory_template: "inventory_cluster_4.1.j2"
+      install_tower: True
+
+To deploy the single-control-single-execution scenario, Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
+
+    ansible-playbook create.yml -e ibmcloud_vpc_name_prefix='perf-scale-test'
+                                -e scenario=single-contorl-single-execution
 
 
-Destroy IBM Cloud Instances If Tower is Deployed
+Destroy IBM Cloud Instances If Tower/Controller is Deployed
 ------------------------------------------------
 
 Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
 
-    ansible-playbook cleanup.yml -e ibmcloud_vsi_count=2 \
-                                 -e ibmcloud_vpc_name_prefix='perf-scale-test'
-
-
-Looking for Tower deployment with Isolated Nodes
-------------------------------------------------
-    ansible-playbook create.yml -e ibmcloud_vsi_count=2 \
-                                -e ibmcloud_vpc_name_prefix='perf-scale-test' \
-                                -e install_iso=True
-
-
-Destroy IBM Cloud Instances If Tower is Deployed with Isolated Nodes
---------------------------------------------------------------------
-
-Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
-
-        ansible-playbook cleanup.yml -e ibmcloud_vsi_count=2 \
-                                     -e ibmcloud_vpc_name_prefix='perf-scale-test' \
-                                     -e install_iso=True
+    ansible-playbook cleanup.yml  -e ibmcloud_vpc_name_prefix='perf-scale-test' \
+                                  -e scenario=single-contorl-single-execution # same scenario you used to deploy
 
 To Take Control Over the Default Configuration Values
 ------------------------------------------------------
 
+If the `scenarios` do not meet your use cases, and you want to set everything yourself -- you can do so with the `scenario=custom`
+or just not defining `scenario`. (In jenkins, `scenario` is always defined, hence the `custom` scenario.
 Default confing file `vars.yml`
 
     ibmcloud_vpc_region: 'jp-tok'  # Region for creating IBM cloud instances
