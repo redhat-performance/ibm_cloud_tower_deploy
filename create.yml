@@ -213,7 +213,7 @@
       include_role:
         name: load_vars
 
-    - name: Install the VMs
+    - name: Install the VMs (Plain and control plane)
       include_tasks: create_vsi.yml
       loop: "{{ range(1, ic_instance |int + 1, 1)|list }}"
       vars:
@@ -311,7 +311,7 @@
               - "IC instance Floating IP: "
               - "Isolated Nodes: {{ iso_node }}"
 
-- name: Create IBM Cloud VPC VSI for Tower Execution Nodes
+- name: Create IBM VMs for Tower Execution Nodes
   hosts: localhost
   gather_facts: off
   vars:

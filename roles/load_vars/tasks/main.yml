@@ -10,7 +10,7 @@
 
 - name: Fetch the tower variables from var file
   include_vars:
-    file: vars/deploy_aap_vars.yml
+    file: vars/aap_deploy_vars.yml
   when: install_aap|default(false)
 
 - name: Fetch more tower variables from var file
