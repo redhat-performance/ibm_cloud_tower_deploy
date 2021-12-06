@@ -187,12 +187,12 @@ For example, two simple toplogies are,
     "single-hybrid":
       hybrid_nodes: 1
       inventory_template: "inventory_cluster_4.1.j2"
-      install_tower: True
+      install_aap: True
     "single-control-single-execution":
       control_nodes: 1
       execution_nodes: 1
       inventory_template: "inventory_cluster_4.1.j2"
-      install_tower: True
+      install_aap: True
 
 To deploy the single-control-single-execution scenario, Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
 

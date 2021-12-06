@@ -3,17 +3,17 @@
   include_vars:
     file: vars/main.yml
 
-- name: Set install_tower if only scenario was passed
+- name: Set install_aap if only scenario was passed
   set_fact:
-    install_tower: true
+    install_aap: true
   when: scenario is defined and scenario not in ["plain-nodes", "custom"]
 
 - name: Fetch the tower variables from var file
   include_vars:
     file: vars/deploy_aap_vars.yml
-  when: install_tower|default(false)
+  when: install_aap|default(false)
 
 - name: Fetch more tower variables from var file
   include_vars:
     file: vars/tower_vars.yml
-  when: install_tower|default(false)
+  when: install_aap|default(false)

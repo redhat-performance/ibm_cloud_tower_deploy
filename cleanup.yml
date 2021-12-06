@@ -23,7 +23,7 @@
         name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
         ic_instance: "{{ ibmcloud_vsi_count|int }}"
-      when: install_tower|default(false)| bool
+      when: install_aap|default(false)| bool
 
     - name: Delete SSH Key
       include_role:

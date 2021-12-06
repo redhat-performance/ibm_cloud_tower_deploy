@@ -15,7 +15,7 @@
     - name: Fail if missing EE
       fail:
         msg: You are running on a nightly build, you need to set the global_ee and control_plane_ee
-      when: "install_tower|default(false)|bool and 'nightlies' in installation_tarball and (global_ee is not defined or control_plane_ee is not defined)"
+      when: "install_aap|default(false)|bool and 'nightlies' in installation_tarball and (global_ee is not defined or control_plane_ee is not defined)"
 
     - name: Print some debug information
       vars:
@@ -26,14 +26,14 @@
 
           Plain IBM Hosts
           --------------------------------
-          Plain Hosts: {{ ibmcloud_vsi_count|default("None set") if not install_tower|default(false)|bool else 0 }}
+          Plain Hosts: {{ ibmcloud_vsi_count|default("None set") if not install_aap|default(false)|bool else 0 }}
           Image ID: {{ ibmcloud_vsi_image_id|default("None set") }}
           Image profile: {{ ibmcloud_vsi_profile|default("None set") }}
           Region: {{ ibmcloud_vpc_region|default("None set") }}
 
       debug:
         msg: "{{ msg.split('\n') }}"
-      when: not (install_tower|default(false)|bool)
+      when: not (install_aap|default(false)|bool)
       tags: debug
       ignore_errors: True
 
@@ -48,16 +48,16 @@
 
           Plain IBM Hosts
           --------------------------------
-          Plain Hosts: {{ ibmcloud_vsi_count|default("None set") if not install_tower|default(false)|bool else 0 }}
+          Plain Hosts: {{ ibmcloud_vsi_count|default("None set") if not install_aap|default(false)|bool else 0 }}
           Image ID: {{ ibmcloud_vsi_image_id|default("None set") }}
           Image profile: {{ ibmcloud_vsi_profile|default("None set") }}
           Region: {{ ibmcloud_vpc_region|default("None set") }}
 
           Control Plane:
           --------------------------------
-          Control Nodes: {{ tower_control_nodes|default("None set") if install_tower|default(false)|bool else 0}}
-          Hybrid Nodes: {{ tower_hybrid_nodes|default("None set") if install_tower|default(false)|bool else 0 }}
-          Total Control Plane Nodes to deploy: {{ ibmcloud_vsi_count|default("None set") if install_tower|default(false)|bool else 0 }}
+          Control Nodes: {{ tower_control_nodes|default("None set") if install_aap|default(false)|bool else 0}}
+          Hybrid Nodes: {{ tower_hybrid_nodes|default("None set") if install_aap|default(false)|bool else 0 }}
+          Total Control Plane Nodes to deploy: {{ ibmcloud_vsi_count|default("None set") if install_aap|default(false)|bool else 0 }}
           Image ID: {{ ibmcloud_vsi_image_id|default("None set") }}
           Image profile: {{ ibmcloud_vsi_profile|default("None set") }}
           Region: {{ ibmcloud_vpc_region|default("None set") }}
@@ -83,7 +83,7 @@
 
       debug:
         msg: "{{ msg.split('\n') }}"
-      when: install_tower|default(false)|bool
+      when: install_aap|default(false)|bool
       tags: debug
       ignore_errors: True
 
@@ -127,7 +127,7 @@
         vsi_profile: "{{ ibmcloud_vsi_db_profile }}"
         image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_region][ibmcloud_image] }}"
         ic_instance: "{{ ibmcloud_vsi_count }}"
-      when: install_tower|default(false)| bool
+      when: install_aap|default(false)| bool
 
     - name: Save Floating IP's of Tower of Database
       set_fact:
@@ -138,7 +138,7 @@
       set_fact:
         db_node: "{{ [ ibmcloud_vsi_node[-1] ] }}"
         cacheable: True
-      when: install_tower|default(false)| bool
+      when: install_aap|default(false)| bool
 
     - name: Configure Security Group Rule
       include_role:
@@ -150,7 +150,7 @@
     - name: Add VM's to Tower and Database group
       include_role:
         name: add_hosts
-      when: install_tower|default(false)| bool
+      when: install_aap|default(false)| bool
 
     - name: Print IBM Cloud Instance Floating IPs
       debug:
@@ -219,7 +219,7 @@
     - name: Add VM's to Isolated group
       include_role:
         name: add_iso_hosts
-      when: install_tower | default(true) | bool
+      when: install_aap | default(true) | bool
 
     - name: Print IBM Cloud Instance Floating IPs
       debug:
@@ -292,7 +292,7 @@
     - name: Add VM's to execution group
       include_role:
         name: add_exec_hosts
-      when: install_tower | default(true) | bool
+      when: install_aap | default(true) | bool
 
     - name: Print IBM Cloud Instance Floating IPs
       debug:
@@ -333,4 +333,4 @@
 
     - name: Install Tower
       include_role:
-        name: install_tower
+        name: install_aap
