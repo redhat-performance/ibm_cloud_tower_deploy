@@ -180,7 +180,7 @@ control nodes -- have only control capabilities
 hop nodes -- serve as a bastion host in the receptor network, have neither control nor execution capabilities
 
 In order to encapsulate the number of different topologies one might want to deploy, named "scenarios" have been
-introduced. Scenarios are described and can be edited/added to in "install_tower_vars.yml".
+introduced. Scenarios are described and can be edited/added to in "deploy_aap_vars.yml".
 
 For example, two simple toplogies are,
 

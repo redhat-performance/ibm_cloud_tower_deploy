@@ -1,7 +1,7 @@
 ---
 - name: Fetch the variables from var file
   include_vars:
-    file: vars.yml
+    file: vars/main.yml
 
 - name: Set install_tower if only scenario was passed
   set_fact:
@@ -10,10 +10,10 @@
 
 - name: Fetch the tower variables from var file
   include_vars:
-    file: install_tower_vars.yml
+    file: vars/deploy_aap_vars.yml
   when: install_tower|default(false)
 
 - name: Fetch more tower variables from var file
   include_vars:
-    file: tower_vars.yml
+    file: vars/tower_vars.yml
   when: install_tower|default(false)
