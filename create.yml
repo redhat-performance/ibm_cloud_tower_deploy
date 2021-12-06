@@ -234,13 +234,14 @@
         ic_instance: "{{ ibmcloud_vsi_count }}"
       when: install_aap|default(false)| bool
 
-    - name: Save Floating IP's of Tower of Database
+    - name: Save Floating IP's of Tower/Plain nodes
       set_fact:
-        tower_node: "{{ ibmcloud_vsi_node[:ibmcloud_vsi_count|int:] }}"
+        tower_node: "{{ ibmcloud_vsi_node[:(tower_control_nodes|default(0)|int+tower_hybrid_nodes|default(0)|int):] }}"
         cacheable: True
 
-    - name: Save Floating IP's of Tower of Database
+    - name: Save Floating IP's of Tower of Database and Automation Hub
       set_fact:
+        automationhub_node: "{{ ibmcloud_vsi_node[(tower_control_nodes|default(0)|int+tower_hybrid_nodes|default(0)|int):-1] if automationhub_nodes|default(0)|int > 0 else [] }}"
         db_node: "{{ [ ibmcloud_vsi_node[-1] ] }}"
         cacheable: True
       when: install_aap|default(false)| bool
@@ -252,9 +253,36 @@
         name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
 
-    - name: Add VM's to Tower and Database group
+    - name: Add VM's to Tower group
       include_role:
-        name: add_hosts
+        name: add_hosts_to_group
+      vars:
+        group_name: "tower"
+        host_ips: "{{ tower_node }}"
+      when: install_aap|default(false)| bool
+
+    - name: Add VM's to Database group
+      include_role:
+        name: add_hosts_to_group
+      vars:
+        group_name: "database"
+        host_ips: "{{ db_node }}"
+      when: install_aap|default(false)| bool
+
+    - name: Add VM's to Automationhub group
+      include_role:
+        name: add_hosts_to_group
+      vars:
+        group_name: "automationhub"
+        host_ips: "{{ automationhub_node }}"
+      when: install_aap|default(false)| bool
+
+    - name: Add VM's to Automationhub group
+      include_role:
+        name: add_hosts_to_group
+      vars:
+        group_name: "cluster_installer"
+        host_ips: "{{ [ibmcloud_vsi_node[0]] }}"
       when: install_aap|default(false)| bool
 
     - name: Print IBM Cloud Instance Floating IPs
@@ -262,6 +290,9 @@
         msg:
           - "IC instance Floating IP: "
           - "{{ ibmcloud_vsi_node }}"
+          - "Tower/Controller nodes: {{ tower_node }}"
+          - "Automationhub nodes: {{ automationhub_node }}"
+          - "Database node: {{ db_node }}"
 
 - name: Create VMs for Tower Isolated Nodes
   hosts: localhost
@@ -302,7 +333,10 @@
 
         - name: Add VM's to Isolated group
           include_role:
-            name: add_iso_hosts
+            name: add_hosts_to_group
+          vars:
+            group_name: iso
+            host_ips: iso_node
           when: install_aap | default(true) | bool
 
         - name: Print IBM Cloud Instance Floating IPs
@@ -352,9 +386,12 @@
             name_prefix: "{{ ibmcloud_vpc_execution_name_prefix }}"
             ibmcloud_ic_region: "{{ ibmcloud_vpc_execution_region }}"
 
-        - name: Add VM's to execution group
+        - name: Add VM's to Execution Group
           include_role:
-            name: add_exec_hosts
+            name: add_hosts_to_group
+          vars:
+            group_name: execution
+            host_ips: execution_node
           when: install_aap | default(true) | bool
 
         - name: Print IBM Cloud Instance Floating IPs
@@ -363,37 +400,39 @@
               - "IC instance Floating IP: "
               - "Execution Nodes: {{ execution_node }}"
 
-- name: Check Ansible connection to new DEMO VSI
-  hosts: tower database
+- name: Check Ansible connection to instances
+  hosts: tower database automationhub execution cluster_installer
   gather_facts: False
   tasks:
     - name: Wait for VSI to become reachable over SSH
       wait_for_connection:
 
 - name: Add team ssh keys
-  hosts: tower database
+  hosts: tower database execution automationhub
   gather_facts: True
   tasks:
     - name: Add towerperf team member keys
       include_role:
         name: auth_keys
 
-- name: Install Tower
-  hosts: tower[0]
+- name: Install AAP
+  hosts: cluster_installer
   gather_facts: False
   tasks:
     - name: Load appropriate vars
       include_role:
         name: load_vars
+    - name: Install AAP
+      when: install_aap
+      block:
+        - name: Fetch the vaulted variables
+          include_vars:
+            file: config/credential.vault
 
-    - name: Fetch the vaulted variables
-      include_vars:
-        file: config/credential.vault
+        - name: Copy the towerperf ssh private key
+          include_role:
+            name: copy_key
 
-    - name: Copy the towerperf ssh private key
-      include_role:
-        name: copy_key
-
-    - name: Install Tower
-      include_role:
-        name: install_aap
+        - name: Install AAP
+          include_role:
+            name: install_aap
