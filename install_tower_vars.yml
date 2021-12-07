@@ -22,6 +22,7 @@ scenario_map:
     hybrid_nodes: 3
     execution_nodes: 3
     inventory_template: "inventory_cluster_4.1.j2"
+    install_tower: True
   "control-cluster-1-hop-to-execution-plane":
     control_nodes: 3
     execution_nodes: 2
@@ -48,6 +49,11 @@ scenario_map:
     install_tower: True
   "single-hybrid":
     hybrid_nodes: 1
+    inventory_template: "inventory_cluster_4.1.j2"
+    install_tower: True
+  "single-control-single-execution":
+    control_nodes: 1
+    execution_nodes: 1
     inventory_template: "inventory_cluster_4.1.j2"
     install_tower: True
   "legacy-38-cluster-with-isolated-nodes":

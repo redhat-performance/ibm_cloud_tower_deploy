@@ -4,9 +4,9 @@
   collections:
   - ibm.cloudcollection
   tasks:
-    - name: Fetch the variables from var file
-      include_vars:
-        file: vars.yml
+    - name: Load appropriate vars
+      include_role:
+        name: load_vars
 
     - name: Delete the VM's
       include_tasks: delete_vsi.yml
@@ -52,13 +52,12 @@
   collections:
   - ibm.cloudcollection
   tasks:
+  - name: Load appropriate vars
+    include_role:
+      name: load_vars
   - name: Should I Delete Isolated Nodes ??
     when: install_iso|default(false)|bool and ibmcloud_vsi_iso_instance_count|int > 0
     block:
-    - name: Fetch the variables from var file
-      include_vars:
-        file: vars.yml
-
     - name: Delete the VM's
       include_tasks: delete_vsi.yml
       loop: "{{ range(1, ic_instance|int + 1, 1)|list }}"
@@ -93,13 +92,13 @@
   collections:
   - ibm.cloudcollection
   tasks:
+  - name: Load appropriate vars
+    include_role:
+      name: load_vars
+
   - name: Should I Delete Execution Nodes ??
     when: install_execution_node|default(false)|bool and ibmcloud_vsi_execution_instance_count|int > 0
     block:
-    - name: Fetch the variables from var file
-      include_vars: 
-        file: vars.yml
-
     - name: Delete the VM's
       include_tasks: delete_vsi.yml
       loop: "{{ range(1, ic_instance|int + 1, 1)|list }}"
@@ -117,13 +116,13 @@
 
     - name: Delete VPC Subnet
       include_role:
-        name: delete_vpc_subnet    
+        name: delete_vpc_subnet
       vars:
         name_prefix: "{{ ibmcloud_vpc_execution_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_execution_region }}"
 
     - name: Delete VPC
-      include_role:      
+      include_role:
         name: delete_vpc
       vars:
         name_prefix: "{{ ibmcloud_vpc_execution_name_prefix }}"
