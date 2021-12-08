@@ -51,7 +51,7 @@
   command: "./setup.sh -i inventory.cluster -e @install_vars.yml {{ EXTRA_SETUP_PARAMS|default('') }} -- --tag generate_dot_file"
   args:
     chdir: "/root/ansible-tower-setup"
-  when: inventory_template == "inventory_cluster_4.1.j2"
+  when: inventory_template == "inventory_cluster_4.1.j2" and 'tower' in groups and groups['tower'] | length > 0
   tags:
     - debug
 
@@ -74,6 +74,7 @@
     src: inventory_towerperf.j2
     dest: "{{ playbook_dir }}/../conf/inventory_towerperf_ibm_cloud"
   delegate_to: localhost
+  when: 'tower' in groups and groups['tower'] | length > 0
 
 - name: Load manifest into variable
   local_action:
@@ -81,6 +82,7 @@
     src: "{{ playbook_dir }}/../playbooks/setup/files/manifest.zip"
   register: manifest_file
   delegate_to: localhost
+  when: 'tower' in groups and groups['tower'] | length > 0
 
 - name: Post manifest file
   uri:
@@ -92,3 +94,4 @@
     body_format: json
     validate_certs: false
     force_basic_auth: true
+  when: 'tower' in groups and groups['tower'] | length > 0

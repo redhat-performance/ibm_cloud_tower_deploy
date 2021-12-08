@@ -9,7 +9,23 @@
 {{ host }}
 {% endfor %}{# for host in groups['database'] #}
 
+{% if groups['automationhub']|length > 0 %}
+[automationhub]
+{% for host in groups['automationhub'] %}
+{{ host }}
+{% endfor %}
+{% endif %}{# if groups['automationhub']|length > 0 #}
+
 [all:vars]
+{% if groups['automationhub']|length > 0 %}
+# Automation Hub Configuration
+automationhub_admin_password='{{ automationhub_admin_password|default('password') }}'
+automationhub_pg_host='{{ groups['database'][0] }}'
+automationhub_pg_port="{{ pg_port|default(5432) }}"
+automationhub_pg_database="{{ automationhub_pg_database|default('automationhub') }}"
+automationhub_pg_username="{{ automationhub_pg_username|default('admin') }}"
+automationhub_pg_password="{{ automationhub_pg_password|default('password') }}"
+{% endif %}{# if groups['automationhub']|length > 0 #}
 # PG variables
 {% for host in groups['database'] %}
 pg_host="{{ host }}"

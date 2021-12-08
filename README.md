@@ -180,19 +180,19 @@ control nodes -- have only control capabilities
 hop nodes -- serve as a bastion host in the receptor network, have neither control nor execution capabilities
 
 In order to encapsulate the number of different topologies one might want to deploy, named "scenarios" have been
-introduced. Scenarios are described and can be edited/added to in "install_tower_vars.yml".
+introduced. Scenarios are described and can be edited/added to in "deploy_aap_vars.yml".
 
 For example, two simple toplogies are,
 
     "single-hybrid":
       hybrid_nodes: 1
       inventory_template: "inventory_cluster_4.1.j2"
-      install_tower: True
+      install_aap: True
     "single-control-single-execution":
       control_nodes: 1
       execution_nodes: 1
       inventory_template: "inventory_cluster_4.1.j2"
-      install_tower: True
+      install_aap: True
 
 To deploy the single-control-single-execution scenario, Run the `ansible-playbook` command with following `EXTRA` cmdline arguments
 

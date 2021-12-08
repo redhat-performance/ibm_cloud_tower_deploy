@@ -3,72 +3,78 @@
 #installation_tarball: https://releases.ansible.com/ansible-tower/setup-bundle/ansible-tower-setup-bundle-latest.tar.gz
 installation_tarball: http://perf54.perf.lab.eng.bos.redhat.com/pub/ansible-automation-platform-setup-bundle-2.0.0-1-early-access.tar.gz
 
-# Default scenario if install_tower is true
+# Default scenario if install_aap is true
 # Doing this to match default installation_tarball. We can update it when default installation_tarball gets updated
 scenario: "legacy-40-cluster"
 
 scenario_map:
   "plain-nodes":
     plain_nodes: 2
-    install_tower: False
+    install_aap: False
   "custom":
     # leave everything as 0/False/defaults, user must provide all overrides
   "control-cluster":
     control_nodes: 3
     execution_nodes: 3
     inventory_template: "inventory_cluster_4.1.j2"
-    install_tower: True
+    install_aap: True
   "hybrid-cluster":
     hybrid_nodes: 3
     execution_nodes: 3
     inventory_template: "inventory_cluster_4.1.j2"
-    install_tower: True
+    install_aap: True
   "control-cluster-1-hop-to-execution-plane":
     control_nodes: 3
     execution_nodes: 2
     hop_nodes: 1
     inventory_template: "inventory_cluster_4.1.j2"
-    install_tower: True
+    install_aap: True
   "control-cluster-2-hop-to-execution-plane":
     control_nodes: 3
     execution_nodes: 2
     hop_nodes: 2
     inventory_template: "inventory_cluster_4.1.j2"
-    install_tower: True
+    install_aap: True
   "control-cluster-3-hop-to-execution-plane":
     control_nodes: 3
     execution_nodes: 2
     hop_nodes: 3
     inventory_template: "inventory_cluster_4.1.j2"
-    install_tower: True
+    install_aap: True
   "hybrid-cluster-hop-to-execution-plane":
     hybrid_nodes: 3
     execution_nodes: 2
     hop_nodes: 1
     inventory_template: "inventory_cluster_4.1.j2"
-    install_tower: True
+    install_aap: True
   "single-hybrid":
     hybrid_nodes: 1
     inventory_template: "inventory_cluster_4.1.j2"
-    install_tower: True
+    install_aap: True
   "single-control-single-execution":
     control_nodes: 1
     execution_nodes: 1
     inventory_template: "inventory_cluster_4.1.j2"
-    install_tower: True
+    install_aap: True
   "legacy-38-cluster-with-isolated-nodes":
     hybrid_nodes: 3
     legacy_isolated_nodes: 2
     inventory_template: "inventory_cluster.j2"
-    install_tower: True
+    install_aap: True
   "legacy-38-cluster":
     hybrid_nodes: 3
     inventory_template: "inventory_cluster.j2"
-    install_tower: True
+    install_aap: True
   "legacy-40-cluster":
     hybrid_nodes: 3
     inventory_template: "inventory_cluster_4.j2"
-    install_tower: True
+    install_aap: True
+  "automationhub-only":
+    control_nodes: 0
+    execution_nodes: 0
+    inventory_template: "inventory_cluster_4.1.j2"
+    install_aap: True
+    automationhub_nodes: 1
 
 plain_nodes: '{{ scenario_map[scenario]["plain_nodes"]|default(0)|int }}'
 tower_control_nodes: '{{ scenario_map[scenario]["control_nodes"]|default(0)|int }}'
@@ -76,13 +82,14 @@ tower_hybrid_nodes: '{{ scenario_map[scenario]["hybrid_nodes"]|default(0)|int }}
 tower_execution_nodes: '{{ scenario_map[scenario]["execution_nodes"]|default(0)|int }}'
 tower_isolated_nodes: '{{ scenario_map[scenario]["legacy_isolated_nodes"]|default(0)|int }}'
 tower_hop_nodes: '{{ scenario_map[scenario]["hop_nodes"]|default(0)|int }}'
+automationhub_nodes: '{{ scenario_map[scenario]["automationhub_nodes"]|default(0)|int }}'
 inventory_template: '{{ scenario_map[scenario]["inventory_template"]|default("") }}'
-install_tower: '{{ scenario_map[scenario]["install_tower"]|default(False)|bool }}'
+install_aap: '{{ scenario_map[scenario]["install_aap"]|default(False)|bool }}'
 
 # Tower and the Database must be in the same Region and in the same VPC
 ibmcloud_vpc_name_prefix: 'ansible-tower-test'
 ibmcloud_vpc_region: 'jp-tok'    # Tokyo
-ibmcloud_vsi_count: '{{ tower_control_nodes|int + tower_hybrid_nodes|int + plain_nodes|int |int}}'
+ibmcloud_vsi_count: '{{ tower_control_nodes|int + tower_hybrid_nodes|int + plain_nodes|int + automationhub_nodes|int |int}}'
 
 # Ansible Tower and Tower database must be in the same
 ibmcloud_vsi_db_profile: 'bx2-4x16'

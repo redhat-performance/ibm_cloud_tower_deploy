@@ -1,9 +1,0 @@
----
-- name: Add Execution nodes to execution group
-  add_host:
-    name: "{{ item }}"
-    ansible_user: root
-    groups: execution
-    ansible_ssh_extra_args: -o StrictHostKeyChecking=no
-    ansible_ssh_private_key_file: conf/towerperf_id_rsa
-  loop: "{{ execution_node }}"

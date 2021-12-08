@@ -1,5 +1,5 @@
 ---
-- name: Create IBM Cloud VPC VSI
+- name: Display deployment information
   gather_facts: off
   hosts: localhost
   vars:
@@ -15,7 +15,7 @@
     - name: Fail if missing EE
       fail:
         msg: You are running on a nightly build, you need to set the global_ee and control_plane_ee
-      when: "install_tower|default(false)|bool and 'nightlies' in installation_tarball and (global_ee is not defined or control_plane_ee is not defined)"
+      when: "install_aap|default(false)|bool and 'nightlies' in installation_tarball and (global_ee is not defined or control_plane_ee is not defined)"
 
     - name: Print some debug information
       vars:
@@ -26,14 +26,14 @@
 
           Plain IBM Hosts
           --------------------------------
-          Plain Hosts: {{ ibmcloud_vsi_count|default("None set") if not install_tower|default(false)|bool else 0 }}
+          Plain Hosts: {{ ibmcloud_vsi_count|default("None set") if not install_aap|default(false)|bool else 0 }}
           Image ID: {{ ibmcloud_vsi_image_id|default("None set") }}
           Image profile: {{ ibmcloud_vsi_profile|default("None set") }}
           Region: {{ ibmcloud_vpc_region|default("None set") }}
 
       debug:
         msg: "{{ msg.split('\n') }}"
-      when: not (install_tower|default(false)|bool)
+      when: not (install_aap|default(false)|bool)
       tags: debug
       ignore_errors: True
 
@@ -48,16 +48,17 @@
 
           Plain IBM Hosts
           --------------------------------
-          Plain Hosts: {{ ibmcloud_vsi_count|default("None set") if not install_tower|default(false)|bool else 0 }}
+          Plain Hosts: {{ ibmcloud_vsi_count|default("None set") if not install_aap|default(false)|bool else 0 }}
           Image ID: {{ ibmcloud_vsi_image_id|default("None set") }}
           Image profile: {{ ibmcloud_vsi_profile|default("None set") }}
           Region: {{ ibmcloud_vpc_region|default("None set") }}
 
           Control Plane:
           --------------------------------
-          Control Nodes: {{ tower_control_nodes|default("None set") if install_tower|default(false)|bool else 0}}
-          Hybrid Nodes: {{ tower_hybrid_nodes|default("None set") if install_tower|default(false)|bool else 0 }}
-          Total Control Plane Nodes to deploy: {{ ibmcloud_vsi_count|default("None set") if install_tower|default(false)|bool else 0 }}
+          Control Nodes: {{ tower_control_nodes|default("None set") if install_aap|default(false)|bool else 0}}
+          Automation Hub Nodes: {{ automationhub_nodes|default("None set") if install_aap|default(false)|bool else 0}}
+          Hybrid Nodes: {{ tower_hybrid_nodes|default("None set") if install_aap|default(false)|bool else 0 }}
+          Total Control Plane Nodes to deploy: {{ ibmcloud_vsi_count|default("None set") if install_aap|default(false)|bool else 0 }}
           Image ID: {{ ibmcloud_vsi_image_id|default("None set") }}
           Image profile: {{ ibmcloud_vsi_profile|default("None set") }}
           Region: {{ ibmcloud_vpc_region|default("None set") }}
@@ -83,32 +84,136 @@
 
       debug:
         msg: "{{ msg.split('\n') }}"
-      when: install_tower|default(false)|bool
+      when: install_aap|default(false)|bool
       tags: debug
       ignore_errors: True
 
-    - name: Configure VPC
+
+- name: Create IBM Cloud VPCs
+  gather_facts: off
+  hosts: localhost
+  strategy: free
+  vars:
+    tower_node: []
+    db_node: []
+  collections:
+  - ibm.cloudcollection
+  tasks:
+    - name: Load appropriate vars
+      include_role:
+        name: load_vars
+
+    - name: Configure Control Plane VPC
       include_role:
         name: configure_vpc
       vars:
         name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
 
-    - name: Configure VPC Subnet
+    - name: Configure Execution Plane VPC
+      include_role:
+        name: configure_vpc
+      vars:
+        name_prefix: "{{ ibmcloud_vpc_execution_name_prefix }}"
+        ibmcloud_ic_region: "{{ ibmcloud_vpc_execution_region }}"
+      when: install_execution_node|default(false)|bool and ibmcloud_vsi_execution_instance_count|int > 0
+
+    - name: Configure Isolated Node VPC (AAP 1.y.z only)
+      include_role:
+        name: configure_vpc
+      vars:
+        name_prefix: "{{ ibmcloud_vpc_iso_name_prefix }}"
+        ibmcloud_ic_region: "{{ ibmcloud_vpc_iso_region }}"
+      when: install_iso|default(false)|bool and ibmcloud_vsi_iso_instance_count|int > 0
+
+
+- name: Create IBM Cloud Subnets
+  gather_facts: off
+  hosts: localhost
+  strategy: free
+  vars:
+    tower_node: []
+    db_node: []
+  collections:
+  - ibm.cloudcollection
+  tasks:
+    - name: Load appropriate vars
+      include_role:
+        name: load_vars
+
+    - name: Configure Control Plane VPC Subnet
       include_role:
         name: configure_vpc_subnet
       vars:
         name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
 
-    - name: Configure SSH Key
+    - name: Configure VPC Execution Plane Subnet
+      include_role:
+        name: configure_vpc_subnet
+      vars:
+        name_prefix: "{{ ibmcloud_vpc_execution_name_prefix }}"
+        ibmcloud_ic_region: "{{ ibmcloud_vpc_execution_region }}"
+      when: install_execution_node|default(false)|bool and ibmcloud_vsi_execution_instance_count|int > 0
+
+    - name: Configure Isolated Node VPC Subnet
+      include_role:
+        name: configure_vpc_subnet
+      vars:
+        name_prefix: "{{ ibmcloud_vpc_iso_name_prefix }}"
+        ibmcloud_ic_region: "{{ ibmcloud_vpc_iso_region }}"
+      when: install_iso|default(false)|bool and ibmcloud_vsi_iso_instance_count|int > 0
+
+- name: Create IBM Cloud SSH Keys
+  gather_facts: off
+  hosts: localhost
+  strategy: free
+  vars:
+    tower_node: []
+    db_node: []
+  collections:
+  - ibm.cloudcollection
+  tasks:
+    - name: Load appropriate vars
+      include_role:
+        name: load_vars
+
+    - name: Configure Control Plane SSH Key
       include_role:
         name: configure_ssh
       vars:
         name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
 
-    - name: Install the VM's for Tower
+    - name: Configure Execution Plane SSH Key
+      include_role:
+        name: configure_ssh
+      vars:
+        name_prefix: "{{ ibmcloud_vpc_execution_name_prefix }}"
+        ibmcloud_ic_region: "{{ ibmcloud_vpc_execution_region }}"
+      when: install_execution_node|default(false)|bool and ibmcloud_vsi_execution_instance_count|int > 0
+
+    - name: Configure Isolated SSH Key
+      include_role:
+        name: configure_ssh
+      vars:
+        name_prefix: "{{ ibmcloud_vpc_iso_name_prefix }}"
+        ibmcloud_ic_region: "{{ ibmcloud_vpc_iso_region }}"
+      when: install_iso|default(false)|bool and ibmcloud_vsi_iso_instance_count|int > 0
+
+- name: Create VMs for Control Plane or Plain Nodes
+  hosts: localhost
+  gather_facts: off
+  vars:
+    iso_node: []
+  collections:
+  - ibm.cloudcollection
+  tasks:
+    - name: Load appropriate vars
+      include_role:
+        name: load_vars
+
+    - name: Install the VMs (Plain and control plane)
       include_tasks: create_vsi.yml
       loop: "{{ range(1, ic_instance |int + 1, 1)|list }}"
       vars:
@@ -127,18 +232,19 @@
         vsi_profile: "{{ ibmcloud_vsi_db_profile }}"
         image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_region][ibmcloud_image] }}"
         ic_instance: "{{ ibmcloud_vsi_count }}"
-      when: install_tower|default(false)| bool
+      when: install_aap|default(false)| bool
 
-    - name: Save Floating IP's of Tower of Database
+    - name: Save Floating IP's of Tower/Plain nodes
       set_fact:
-        tower_node: "{{ ibmcloud_vsi_node[:ibmcloud_vsi_count|int:] }}"
+        tower_node: "{{ ibmcloud_vsi_node[:(tower_control_nodes|default(0)|int+tower_hybrid_nodes|default(0)|int):] }}"
         cacheable: True
 
-    - name: Save Floating IP's of Tower of Database
+    - name: Save Floating IP's of Tower of Database and Automation Hub
       set_fact:
+        automationhub_node: "{{ ibmcloud_vsi_node[(tower_control_nodes|default(0)|int+tower_hybrid_nodes|default(0)|int):-1] if automationhub_nodes|default(0)|int > 0 else [] }}"
         db_node: "{{ [ ibmcloud_vsi_node[-1] ] }}"
         cacheable: True
-      when: install_tower|default(false)| bool
+      when: install_aap|default(false)| bool
 
     - name: Configure Security Group Rule
       include_role:
@@ -147,18 +253,48 @@
         name_prefix: "{{ ibmcloud_vpc_name_prefix }}"
         ibmcloud_ic_region: "{{ ibmcloud_vpc_region }}"
 
-    - name: Add VM's to Tower and Database group
+    - name: Add VM's to Tower group
       include_role:
-        name: add_hosts
-      when: install_tower|default(false)| bool
+        name: add_hosts_to_group
+      vars:
+        group_name: "tower"
+        host_ips: "{{ tower_node }}"
+      when: install_aap|default(false)| bool
+
+    - name: Add VM's to Database group
+      include_role:
+        name: add_hosts_to_group
+      vars:
+        group_name: "database"
+        host_ips: "{{ db_node }}"
+      when: install_aap|default(false)| bool
+
+    - name: Add VM's to Automationhub group
+      include_role:
+        name: add_hosts_to_group
+      vars:
+        group_name: "automationhub"
+        host_ips: "{{ automationhub_node }}"
+      when: install_aap|default(false)| bool
+
+    - name: Add VM's to Automationhub group
+      include_role:
+        name: add_hosts_to_group
+      vars:
+        group_name: "cluster_installer"
+        host_ips: "{{ [ibmcloud_vsi_node[0]] }}"
+      when: install_aap|default(false)| bool
 
     - name: Print IBM Cloud Instance Floating IPs
       debug:
         msg:
           - "IC instance Floating IP: "
           - "{{ ibmcloud_vsi_node }}"
+          - "Tower/Controller nodes: {{ tower_node }}"
+          - "Automationhub nodes: {{ automationhub_node }}"
+          - "Database node: {{ db_node }}"
 
-- name: Create IBM Cloud VPC VSI for Tower Isolated Nodes
+- name: Create VMs for Tower Isolated Nodes
   hosts: localhost
   gather_facts: off
   vars:
@@ -166,68 +302,50 @@
   collections:
   - ibm.cloudcollection
   tasks:
-  - name: Should I Install Isolated Nodes ??
-    when: install_iso|default(false)|bool and ibmcloud_vsi_iso_instance_count|int > 0
-    block:
     - name: Load appropriate vars
       include_role:
         name: load_vars
 
-    - name: Configure VPC
-      include_role:
-        name: configure_vpc
-      vars:
-        name_prefix: "{{ ibmcloud_vpc_iso_name_prefix }}"
-        ibmcloud_ic_region: "{{ ibmcloud_vpc_iso_region }}"
+    - name: Should I Install Isolated Nodes ??
+      when: install_iso|default(false)|bool and ibmcloud_vsi_iso_instance_count|int > 0
+      block:
+        - name: Install the VM's for Isolated Nodes
+          include_tasks: create_vsi.yml
+          loop: "{{ range(1, ic_instance |int + 1, 1)|list }}"
+          vars:
+            name_prefix: "{{ ibmcloud_vpc_iso_name_prefix }}"
+            ibmcloud_ic_region: "{{ ibmcloud_vpc_iso_region }}"
+            vsi_profile: "{{ ibmcloud_vsi_iso_profile }}"
+            image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_iso_region][ibmcloud_image] }}"
+            ic_instance: "{{ ibmcloud_vsi_iso_instance_count }}"
 
-    - name: Configure VPC Subnet
-      include_role:
-        name: configure_vpc_subnet
-      vars:
-        name_prefix: "{{ ibmcloud_vpc_iso_name_prefix }}"
-        ibmcloud_ic_region: "{{ ibmcloud_vpc_iso_region }}"
+        - name: Save Floating IP's of Isolated Nodes
+          set_fact:
+            iso_node: "{{ ibmcloud_vsi_node[ibmcloud_vsi_count|int + 1::] }}"
+            cacheable: True
 
-    - name: Configure SSH Key
-      include_role:
-        name: configure_ssh
-      vars:
-        name_prefix: "{{ ibmcloud_vpc_iso_name_prefix }}"
-        ibmcloud_ic_region: "{{ ibmcloud_vpc_iso_region }}"
+        - name: Configure Security Group Rule
+          include_role:
+            name: configure_security_group
+          vars:
+            name_prefix: "{{ ibmcloud_vpc_iso_name_prefix }}"
+            ibmcloud_ic_region: "{{ ibmcloud_vpc_iso_region }}"
 
-    - name: Install the VM's for Isolated Nodes
-      include_tasks: create_vsi.yml
-      loop: "{{ range(1, ic_instance |int + 1, 1)|list }}"
-      vars:
-        name_prefix: "{{ ibmcloud_vpc_iso_name_prefix }}"
-        ibmcloud_ic_region: "{{ ibmcloud_vpc_iso_region }}"
-        vsi_profile: "{{ ibmcloud_vsi_iso_profile }}"
-        image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_iso_region][ibmcloud_image] }}"
-        ic_instance: "{{ ibmcloud_vsi_iso_instance_count }}"
+        - name: Add VM's to Isolated group
+          include_role:
+            name: add_hosts_to_group
+          vars:
+            group_name: iso
+            host_ips: iso_node
+          when: install_aap | default(true) | bool
 
-    - name: Save Floating IP's of Isolated Nodes
-      set_fact:
-        iso_node: "{{ ibmcloud_vsi_node[ibmcloud_vsi_count|int + 1::] }}"
-        cacheable: True
+        - name: Print IBM Cloud Instance Floating IPs
+          debug:
+            msg:
+              - "IC instance Floating IP: "
+              - "Isolated Nodes: {{ iso_node }}"
 
-    - name: Configure Security Group Rule
-      include_role:
-        name: configure_security_group
-      vars:
-        name_prefix: "{{ ibmcloud_vpc_iso_name_prefix }}"
-        ibmcloud_ic_region: "{{ ibmcloud_vpc_iso_region }}"
-
-    - name: Add VM's to Isolated group
-      include_role:
-        name: add_iso_hosts
-      when: install_tower | default(true) | bool
-
-    - name: Print IBM Cloud Instance Floating IPs
-      debug:
-        msg:
-          - "IC instance Floating IP: "
-          - "Isolated Nodes: {{ iso_node }}"
-
-- name: Create IBM Cloud VPC VSI for Tower Execution Nodes
+- name: Create IBM VMs for Tower Execution Nodes
   hosts: localhost
   gather_facts: off
   vars:
@@ -235,102 +353,86 @@
   collections:
   - ibm.cloudcollection
   tasks:
-  - name: Should I Install Execution Nodes ??
-    when: install_execution_node|default(false)|bool and ibmcloud_vsi_execution_instance_count|int > 0
-    block:
-    - name: Load appropriate vars
-      include_role:
-        name: load_vars
+    - name: Should I Install Execution Nodes ??
+      when: install_execution_node|default(false)|bool and ibmcloud_vsi_execution_instance_count|int > 0
+      block:
+        - name: Load appropriate vars
+          include_role:
+            name: load_vars
 
-    - name: Configure VPC
-      include_role:
-        name: configure_vpc
-      vars:
-        name_prefix: "{{ ibmcloud_vpc_execution_name_prefix }}"
-        ibmcloud_ic_region: "{{ ibmcloud_vpc_execution_region }}"
+        - name: Install the VM's for Execution Nodes
+          include_tasks: create_vsi.yml
+          loop: "{{ range(1, ic_instance |int + 1, 1)|list }}"
+          vars:
+            name_prefix: "{{ ibmcloud_vpc_execution_name_prefix }}"
+            ibmcloud_ic_region: "{{ ibmcloud_vpc_execution_region }}"
+            vsi_profile: "{{ ibmcloud_vsi_execution_profile }}"
+            image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_execution_region][ibmcloud_image] }}"
+            ic_instance: "{{ ibmcloud_vsi_execution_instance_count }}"
 
-    - name: Configure VPC Subnet
-      include_role:
-        name: configure_vpc_subnet
-      vars:
-        name_prefix: "{{ ibmcloud_vpc_execution_name_prefix }}"
-        ibmcloud_ic_region: "{{ ibmcloud_vpc_execution_region }}"
+        - name: Calculate execution node start index in list of IPs
+          set_fact:
+            execution_node_start_indx: "{{ (ibmcloud_vsi_node|length - ibmcloud_vsi_execution_instance_count|int) | int }}"
 
-    - name: Configure SSH Key
-      include_role:
-        name: configure_ssh
-      vars:
-        name_prefix: "{{ ibmcloud_vpc_execution_name_prefix }}"
-        ibmcloud_ic_region: "{{ ibmcloud_vpc_execution_region }}"
+        - name: Save Floating IP's of Execution Nodes
+          set_fact:
+            execution_node: "{{ ibmcloud_vsi_node[(execution_node_start_indx|int)::] }}"
+            cacheable: True
 
-    - name: Install the VM's for Execution Nodes
-      include_tasks: create_vsi.yml
-      loop: "{{ range(1, ic_instance |int + 1, 1)|list }}"
-      vars:
-        name_prefix: "{{ ibmcloud_vpc_execution_name_prefix }}"
-        ibmcloud_ic_region: "{{ ibmcloud_vpc_execution_region }}"
-        vsi_profile: "{{ ibmcloud_vsi_execution_profile }}"
-        image_id: "{{ ibmcloud_image_ids[ibmcloud_vpc_execution_region][ibmcloud_image] }}"
-        ic_instance: "{{ ibmcloud_vsi_execution_instance_count }}"
+        - name: Configure Security Group Rule
+          include_role:
+            name: configure_security_group
+          vars:
+            name_prefix: "{{ ibmcloud_vpc_execution_name_prefix }}"
+            ibmcloud_ic_region: "{{ ibmcloud_vpc_execution_region }}"
 
-    - name: Calculate execution node start index in list of IPs
-      set_fact:
-        execution_node_start_indx: "{{ (ibmcloud_vsi_node|length - ibmcloud_vsi_execution_instance_count|int) | int }}"
+        - name: Add VM's to Execution Group
+          include_role:
+            name: add_hosts_to_group
+          vars:
+            group_name: execution
+            host_ips: execution_node
+          when: install_aap | default(true) | bool
 
-    - name: Save Floating IP's of Execution Nodes
-      set_fact:
-        execution_node: "{{ ibmcloud_vsi_node[(execution_node_start_indx|int)::] }}"
-        cacheable: True
+        - name: Print IBM Cloud Instance Floating IPs
+          debug:
+            msg:
+              - "IC instance Floating IP: "
+              - "Execution Nodes: {{ execution_node }}"
 
-    - name: Configure Security Group Rule
-      include_role:
-        name: configure_security_group
-      vars:
-        name_prefix: "{{ ibmcloud_vpc_execution_name_prefix }}"
-        ibmcloud_ic_region: "{{ ibmcloud_vpc_execution_region }}"
-
-    - name: Add VM's to execution group
-      include_role:
-        name: add_exec_hosts
-      when: install_tower | default(true) | bool
-
-    - name: Print IBM Cloud Instance Floating IPs
-      debug:
-        msg:
-          - "IC instance Floating IP: "
-          - "Execution Nodes: {{ execution_node }}"
-
-- name: Check Ansible connection to new DEMO VSI
-  hosts: tower database
+- name: Check Ansible connection to instances
+  hosts: tower database automationhub execution cluster_installer
   gather_facts: False
   tasks:
     - name: Wait for VSI to become reachable over SSH
       wait_for_connection:
 
 - name: Add team ssh keys
-  hosts: tower database
+  hosts: tower database execution automationhub
   gather_facts: True
   tasks:
     - name: Add towerperf team member keys
       include_role:
         name: auth_keys
 
-- name: Install Tower
-  hosts: tower[0]
+- name: Install AAP
+  hosts: cluster_installer
   gather_facts: False
   tasks:
     - name: Load appropriate vars
       include_role:
         name: load_vars
+    - name: Install AAP
+      when: install_aap
+      block:
+        - name: Fetch the vaulted variables
+          include_vars:
+            file: config/credential.vault
 
-    - name: Fetch the vaulted variables
-      include_vars:
-        file: config/credential.vault
+        - name: Copy the towerperf ssh private key
+          include_role:
+            name: copy_key
 
-    - name: Copy the towerperf ssh private key
-      include_role:
-        name: copy_key
-
-    - name: Install Tower
-      include_role:
-        name: install_tower
+        - name: Install AAP
+          include_role:
+            name: install_aap
