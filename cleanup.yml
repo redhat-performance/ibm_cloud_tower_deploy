@@ -1,5 +1,87 @@
 ---
-- name: Cleanup IBM Cloud VPC VSI Related to Tower and Database Nodes
+- name: Display deployment to be cleaned up information
+  gather_facts: off
+  hosts: localhost
+  vars:
+  collections:
+  - ibm.cloudcollection
+  tasks:
+    - name: Load appropriate vars
+      include_role:
+        name: load_vars
+
+    - name: Print some debug information
+      vars:
+        msg: |
+          Instances to be cleaned up:
+          --------------------------------
+          Scenario: {{ scenario|default("None selected") }}
+
+          Plain IBM Hosts
+          --------------------------------
+          Plain Hosts: {{ ibmcloud_vsi_count|default("None set") if not install_aap|default(false)|bool else 0 }}
+          Image ID: {{ ibmcloud_vsi_image_id|default("None set") }}
+          Image profile: {{ ibmcloud_vsi_profile|default("None set") }}
+          Region: {{ ibmcloud_vpc_region|default("None set") }}
+
+      debug:
+        msg: "{{ msg.split('\n') }}"
+      when: not (install_aap|default(false)|bool)
+      tags: debug
+      ignore_errors: True
+
+    - name: Print some debug information
+      vars:
+        msg: |
+          Instances to be cleaned up:
+          --------------------------------
+          Scenario: {{ scenario|default("None selected") }}
+          Inventory Template: {{ inventory_template|default("None set") }}
+          Installation tarball: {{ installation_tarball }}
+
+          Plain IBM Hosts
+          --------------------------------
+          Plain Hosts: {{ ibmcloud_vsi_count|default("None set") if not install_aap|default(false)|bool else 0 }}
+          Image ID: {{ ibmcloud_vsi_image_id|default("None set") }}
+          Image profile: {{ ibmcloud_vsi_profile|default("None set") }}
+          Region: {{ ibmcloud_vpc_region|default("None set") }}
+
+          Control Plane:
+          --------------------------------
+          Control Nodes: {{ tower_control_nodes|default("None set") if install_aap|default(false)|bool else 0}}
+          Automation Hub Nodes: {{ automationhub_nodes|default("None set") if install_aap|default(false)|bool else 0}}
+          Hybrid Nodes: {{ tower_hybrid_nodes|default("None set") if install_aap|default(false)|bool else 0 }}
+          Total Control Plane Nodes to deploy: {{ ibmcloud_vsi_count|default("None set") if install_aap|default(false)|bool else 0 }}
+          Image ID: {{ ibmcloud_vsi_image_id|default("None set") }}
+          Image profile: {{ ibmcloud_vsi_profile|default("None set") }}
+          Region: {{ ibmcloud_vpc_region|default("None set") }}
+
+          Execution Plane:
+          --------------------------------
+          Hop Nodes: {{ tower_hop_nodes|default("None set") }}
+          Execution Nodes: {{ tower_execution_nodes|default("None set") }}
+          Total nodes to deploy for execution plane: {{ ibmcloud_vsi_execution_instance_count|default("None set") }}
+          Enable execution nodes: {{ install_execution_node|default("None set") }}
+          Image ID: {{ ibmcloud_vsi_execution_image_id|default("None set") }}
+          Image profile: {{ ibmcloud_vsi_execution_profile|default("None set") }}
+          Region: {{ ibmcloud_vpc_execution_region|default("None set") }}
+
+          Isolated Nodes:
+          --------------------------------
+          Legacy Isolated Nodes requested: {{ tower_isolated_nodes|default("None set") }}
+          Legacy Isolated Nodes to deploy: {{ ibmcloud_vsi_iso_instance_count|default("None set") }}
+          Enable legacy isolated nodes: {{ install_iso|default("None set") }}
+          Image ID: {{ ibmcloud_vsi_iso_image_id|default("None set") }}
+          Image profile: {{ ibmcloud_vsi_iso_profile|default("None set") }}
+          Region: {{ ibmcloud_vpc_iso_region|default("None set") }}
+
+      debug:
+        msg: "{{ msg.split('\n') }}"
+      when: install_aap|default(false)|bool
+      tags: debug
+      ignore_errors: True
+
+- name: Cleanup IBM Cloud VPC VSI Nodes
   hosts: localhost
   collections:
   - ibm.cloudcollection
