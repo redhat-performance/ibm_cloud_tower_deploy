@@ -74,7 +74,7 @@
     src: inventory_towerperf.j2
     dest: "{{ playbook_dir }}/../conf/inventory_towerperf_ibm_cloud"
   delegate_to: localhost
-  when: 'tower' in groups and groups['tower'] | length > 0
+  when: "'tower' in groups and groups['tower'] | length > 0"
 
 - name: Load manifest into variable
   local_action:
@@ -82,7 +82,7 @@
     src: "{{ playbook_dir }}/../playbooks/setup/files/manifest.zip"
   register: manifest_file
   delegate_to: localhost
-  when: 'tower' in groups and groups['tower'] | length > 0
+  when: "'tower' in groups and groups['tower'] | length > 0"
 
 - name: Post manifest file
   uri:
@@ -94,4 +94,4 @@
     body_format: json
     validate_certs: false
     force_basic_auth: true
-  when: 'tower' in groups and groups['tower'] | length > 0
+  when: "'tower' in groups and groups['tower'] | length > 0"
