@@ -205,7 +205,9 @@
   hosts: localhost
   gather_facts: off
   vars:
-    iso_node: []
+    tower_node: []
+    db_node: []
+    automationhub_node: []
   collections:
   - ibm.cloudcollection
   tasks:
