@@ -274,8 +274,8 @@
       include_role:
         name: add_hosts_to_group
       vars:
-        group_name: execution
-        host_ips: execution_node
+        group_name: "execution"
+        host_ips: "{{ execution_node }}"
       when: install_aap | default(true) | bool
 
     - name: Print IBM Cloud Instance Floating IPs
@@ -337,8 +337,8 @@
       include_role:
         name: add_hosts_to_group
       vars:
-        group_name: iso
-        host_ips: iso_node
+        group_name: "iso"
+        host_ips: "{{ iso_node }}"
       when: install_aap | default(true) | bool
 
     - name: Print IBM Cloud Instance Floating IPs
