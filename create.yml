@@ -92,7 +92,6 @@
 - name: Create IBM Cloud Infra for Plain/Control Plane 
   gather_facts: off
   hosts: localhost
-  strategy: free
   vars:
     tower_node: []
     db_node: []
@@ -209,7 +208,6 @@
 - name: Create IBM Cloud Infra for Execution Plane
   gather_facts: off
   hosts: localhost
-  strategy: free
   vars:
     execution_node: []
   collections:
