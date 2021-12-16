@@ -10,7 +10,7 @@
     name: "{{ name_prefix }}-subnet"
     state: available
     #id: "{{ subnet.id | default(omit) }}"
-    vpc: "{{ vpc.id }}"
+    vpc: "{{ vpc.resource.id }}"
     ipv4_cidr_block: "{{ vpc_zone.cidr }}"
     zone: "{{ vpc_zone.name }}"
     region: "{{ ibmcloud_ic_region }}"
