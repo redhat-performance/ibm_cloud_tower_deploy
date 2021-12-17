@@ -1,16 +1,10 @@
 ---
-- name: Fetch VPC details
-  ibm.cloudcollection.ibm_is_vpc_info:
-    name: "{{ name_prefix }}-vpc"
-    region: "{{ ibmcloud_ic_region }}"
-  register: vpc
-
 - name: Configure VPC Subnet
   ibm.cloudcollection.ibm_is_subnet:
     name: "{{ name_prefix }}-subnet"
     state: available
     #id: "{{ subnet.id | default(omit) }}"
-    vpc: "{{ vpc.resource.id }}"
+    vpc: "{{ vpc.id }}"
     ipv4_cidr_block: "{{ vpc_zone.cidr }}"
     zone: "{{ vpc_zone.name }}"
     region: "{{ ibmcloud_ic_region }}"
