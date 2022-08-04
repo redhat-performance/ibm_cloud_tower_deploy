@@ -23,4 +23,4 @@
 {% endfor %}{# for host in groups['database'] #}
 
 [prometheus]
-prometheus.hosted.upshift.rdu2.redhat.com ansible_ssh_private_key_file=conf/towerperf_id_rsa ansible_user=ansible-user
+prometheus.hosted.upshift.rdu2.redhat.com ansible_ssh_private_key_file=conf/towerperf_id_rsa ansible_user=ansible-user ansible_become=false
