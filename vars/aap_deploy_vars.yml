@@ -6,7 +6,7 @@
 # AAP 2.1
 #installation_tarball: http://perf54.perf.lab.eng.bos.redhat.com/pub/ansible-automation-platform-setup-bundle-2.1.0-1.tar.gz
 # AAP 2.2
-installation_tarball: http://sat-repo-registry-instance.hosted.upshift.rdu2.redhat.com/pub/ansible-automation-platform-setup-bundle-2.2.0-6.1.tar.gz
+installation_tarball: http://sat-repo-registry-instance.hosted.upshift.rdu2.redhat.com/pub/ansible-automation-platform-setup-bundle-2.2.1-1.tar.gz
 
 # Default scenario if install_aap is true
 # Doing this to match default installation_tarball. We can update it when default installation_tarball gets updated
