@@ -12,6 +12,7 @@
     state: absent
     id: "{{ fip.resource.id }}"
     region: "{{ ibmcloud_ic_region }}"
+    zone: "{{ fip.resource.zone }}"
   register: fip_delete_output
   ignore_errors: True
 
