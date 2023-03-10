@@ -9,38 +9,47 @@ ibmcloud_image_ids:
     "rhel_8.3": "r026-587ff0d6-6549-44f6-a6ed-f1e11174fb43"
     "rhel_8.4": "r026-ad73645c-afe8-4b93-b4fe-dbfd1880bebd"
     "rhel_8.6": "r026-5c656a84-ce27-4cdd-9345-f11dfab6d12b"
+    "rhel_9.0": "r026-8daae8cb-f0c4-4fbc-871d-627b6fbfdbfa"
   "jp-osa":
     "rhel_8.3": "r034-260cc2b2-d96c-4fa1-83d5-ef7524d6c909"
     "rhel_8.4": "r034-ee558f96-4494-461c-aec6-20d2efc7df05"
     "rhel_8.6": "r034-fbed08a5-8f70-4b4d-9cb5-7e861af666ef"
+    "rhel_9.0": "r034-3d8d5f07-b243-422c-b660-ddd2ae1ce2e0"
   "jp-tok":
     "rhel_8.3": "r022-939bbfe2-d823-4c01-98a3-a6f8193731d8"
     "rhel_8.4": "r022-25bf2491-2911-4860-9573-bf487884f3c1"
     "rhel_8.6": "r022-8eccc288-64d3-4040-a3a9-ac67f3156894"
+    "rhel_9.0": "r022-81f560c3-3fb2-42e0-816d-bd83342aadf7"
   "eu-de":
     "rhel_8.3": "r010-5ea36559-4a3a-40e4-9222-b1d0a430951e"
     "rhel_8.4": "r010-a704b088-c2ee-4f92-b384-1a0ac30f2f19"
     "rhel_8.6": "r010-0a2fa123-2e6d-449d-b0fa-03df906f094f"
+    "rhel_9.0": "r010-34042df5-677c-48be-a3a5-a7630b7a179b"
   "eu-gb":
     "rhel_8.3": "r018-179f9b5c-0e4d-4614-8fbb-07e8ec55a493"
     "rhel_8.4": "r018-fc0d7bfc-8fc1-4184-a9b8-5e8bcdd61c0e"
     "rhel_8.6": "r018-3137468d-b678-48d2-8d3e-3e93a6abd01a"
+    "rhel_9.0": "r018-6a7c164f-5242-40a8-b1f3-56c0f4bbc2e7"
   "ca-tor":
     "rhel_8.3": "r038-ce441bef-75f6-4bca-a1b4-96ce0e9ca1e6"
     "rhel_8.4": "r038-358762fc-47c7-43f4-b2b6-2cc17e5c1f60"
     "rhel_8.6": "r038-185f3acc-02e7-44e2-8529-d959ee6dc3d6"
+    "rhel_9.0": "r038-b1141d88-a13c-41d5-b0ea-efb6912a6734"
   "us-south":
     "rhel_8.3": "r006-c803a85a-e3cf-4f61-bafa-ae1d9e759d15"
     "rhel_8.4": "r006-bf22526d-a650-49bb-bc6e-3275694d2b27"
     "rhel_8.6": "r006-1366d3e6-bf5b-49a0-b69a-8efd93cc225f"
+    "rhel_9.0": "r006-9b5147dc-5e5f-4728-b304-91f566cad12e"
   "us-east":
     "rhel_8.3": "r014-02843c52-e12b-4f72-a631-931b4bf6589d"
     "rhel_8.4": "r014-0b1d622e-19f8-4e20-aa2d-ef4256c9ee72"
     "rhel_8.6": "r014-af8f431d-f0bf-4552-a30e-8b9a7bfc2a10"
+    "rhel_9.0": "r014-1d394570-174f-4c9c-91fa-319023c9ac27"
   "br-sao":
     "rhel_8.3": "r042-71b7a0b1-5b3c-4024-b815-2b2d79687792"
     "rhel_8.4": "r042-06ad9b4d-02a7-44bb-989e-18f1882646ac"
     "rhel_8.6": "r042-2f9425ba-be3a-4d17-81d9-84829538ae2f"
+    "rhel_9.0": "r042-7cf9408e-c22c-47c7-ba54-a72abb43c536"
 
 # Find the right RHEL 8.3 image for the region
 # Recorded from for region in $IC_REGIONS; do ibmcloud target -r $region && ibmcloud is image ibm-redhat-8-3-minimal-amd64-3;
